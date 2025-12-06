@@ -13,7 +13,6 @@ import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
-import { Select } from '@/components/ui/Select';
 import { Card, CardContent } from '@/components/ui/Card';
 import { siteSettings } from '@/data/settings';
 
@@ -159,12 +158,24 @@ export default function ContactPage() {
                         {...register('phone')}
                       />
 
-                      <Select
-                        label="Subject"
-                        options={subjectOptions}
-                        error={errors.subject?.message}
-                        {...register('subject')}
-                      />
+                      <div className="w-full">
+                        <label className="mb-2 block font-display text-sm font-medium text-foreground">
+                          Subject
+                        </label>
+                        <select
+                          className="flex w-full items-center justify-between rounded-[2px] bg-surface px-4 py-3 border border-border text-foreground min-h-[44px] transition-colors duration-200 focus:border-str-gold focus:outline-none focus:ring-2 focus:ring-focus-blue/20"
+                          {...register('subject')}
+                        >
+                          {subjectOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.subject?.message && (
+                          <p className="mt-1 text-sm text-error">{errors.subject.message}</p>
+                        )}
+                      </div>
 
                       <Textarea
                         label="Message"

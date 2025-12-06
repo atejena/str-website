@@ -30,7 +30,7 @@ export default function AdminGalleryPage() {
             className="relative group"
           >
             <div className="relative aspect-square rounded-[2px] overflow-hidden bg-surface">
-              <Image src={image.url} alt={image.alt} fill className="object-cover" />
+              <Image src={image.imageUrl} alt={image.altText} fill className="object-cover" />
               <div className="absolute inset-0 bg-str-black/0 group-hover:bg-str-black/60 transition-all" />
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="flex gap-2">

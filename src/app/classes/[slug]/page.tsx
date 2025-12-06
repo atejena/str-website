@@ -233,14 +233,14 @@ export default function ClassDetailPage({ params }: ClassDetailPageProps) {
                     <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-str-gold">
                       <Image
                         src={classInstructor.photo}
-                        alt={classInstructor.fullName}
+                        alt={classInstructor.name}
                         fill
                         className="object-cover"
                       />
                     </div>
                     <div>
                       <div className="font-display font-bold text-foreground group-hover:text-str-gold transition-colors">
-                        {classInstructor.fullName}
+                        {classInstructor.name}
                       </div>
                       <div className="text-sm text-str-gold">{classInstructor.title}</div>
                     </div>

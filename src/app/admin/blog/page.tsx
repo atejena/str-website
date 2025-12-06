@@ -42,10 +42,10 @@ export default function AdminBlogPage() {
                       <div className="font-display font-bold text-foreground">{post.title}</div>
                       <div className="text-sm text-muted">{post.readingTimeMinutes} min read</div>
                     </td>
-                    <td className="px-6 py-4 text-muted">{post.author}</td>
+                    <td className="px-6 py-4 text-muted">{post.authorName}</td>
                     <td className="px-6 py-4">
-                      <Badge variant={post.status === 'published' ? 'primary' : 'secondary'} size="sm">
-                        {post.status}
+                      <Badge variant={post.published ? 'primary' : 'secondary'} size="sm">
+                        {post.published ? 'Published' : 'Draft'}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-muted">{formatDate(post.createdAt)}</td>

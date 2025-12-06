@@ -11,11 +11,12 @@ import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/Accordion';
 import { faqs, getFAQsByCategory } from '@/data/faqs';
+import type { FAQCategory } from '@/types/database';
 
-const categories = ['Membership', 'Classes', 'Facilities', 'Policies'];
+const categories: FAQCategory[] = ['Membership', 'Classes', 'Facilities', 'Policies'];
 
 export default function FAQPage() {
-  const [selectedCategory, setSelectedCategory] = useState('Membership');
+  const [selectedCategory, setSelectedCategory] = useState<FAQCategory>('Membership');
 
   const categoryFaqs = getFAQsByCategory(selectedCategory);
 

@@ -14,7 +14,7 @@ import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { getPostBySlug, getPublishedPosts } from '@/data/blog';
+import { getBlogPostBySlug, getPublishedPosts } from '@/data/blog';
 import { formatDate } from '@/lib/utils';
 
 interface BlogPostPageProps {
@@ -23,7 +23,7 @@ interface BlogPostPageProps {
 
 export default function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = use(params);
-  const post = getPostBySlug(slug);
+  const post = getBlogPostBySlug(slug);
 
   if (!post) {
     notFound();
@@ -81,11 +81,11 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               <div className="flex flex-wrap items-center gap-6 text-muted">
                 <div className="flex items-center gap-2">
                   <User className="w-5 h-5" />
-                  <span>{post.author}</span>
+                  <span>{post.authorName}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
-                  <span>{formatDate(post.publishedAt || post.createdAt)}</span>
+                  <span>{formatDate(post.publishDate || post.createdAt)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5" />
@@ -127,7 +127,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               className="mt-12 p-6 bg-surface rounded-[2px] border border-border"
             >
               <h3 className="font-display font-bold text-foreground mb-2">
-                Written by {post.author}
+                Written by {post.authorName}
               </h3>
               <p className="text-muted text-sm">
                 {/* PLACEHOLDER: Add author bio when available */}

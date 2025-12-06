@@ -9,16 +9,17 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Section } from '@/components/layout/Section';
 import { galleryImages, getGalleryByCategory } from '@/data/gallery';
+import type { GalleryCategory } from '@/types/database';
 
-const categories = ['All', 'Facility', 'Classes', 'Members', 'Events'];
+const categories: ('All' | GalleryCategory)[] = ['All', 'Facility', 'Classes', 'Events', 'Transformations'];
 
 export default function GalleryPage() {
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState<'All' | GalleryCategory>('All');
   const [selectedImage, setSelectedImage] = useState<typeof galleryImages[0] | null>(null);
 
   const filteredImages = selectedCategory === 'All'
     ? galleryImages
-    : getGalleryByCategory(selectedCategory);
+    : getGalleryByCategory(selectedCategory as GalleryCategory);
 
   return (
     <>
@@ -90,8 +91,8 @@ export default function GalleryPage() {
                     image.featured ? 'aspect-square' : 'aspect-[4/3]'
                   )}>
                     <Image
-                      src={image.url}
-                      alt={image.alt}
+                      src={image.imageUrl}
+                      alt={image.altText}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
@@ -135,16 +136,16 @@ export default function GalleryPage() {
               >
                 <div className="relative aspect-[4/3] w-full">
                   <Image
-                    src={selectedImage.url}
-                    alt={selectedImage.alt}
+                    src={selectedImage.imageUrl}
+                    alt={selectedImage.altText}
                     fill
                     className="object-contain"
                     priority
                   />
                 </div>
-                {selectedImage.caption && (
+                {selectedImage.description && (
                   <p className="text-white text-center mt-4 font-display">
-                    {selectedImage.caption}
+                    {selectedImage.description}
                   </p>
                 )}
               </motion.div>

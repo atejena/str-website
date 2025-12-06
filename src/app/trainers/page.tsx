@@ -90,7 +90,7 @@ export default function TrainersPage() {
                       <div className="relative aspect-[3/4] md:aspect-auto overflow-hidden">
                         <Image
                           src={trainer.photo}
-                          alt={trainer.fullName}
+                          alt={trainer.name}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                         />
@@ -100,7 +100,7 @@ export default function TrainersPage() {
                       {/* Content */}
                       <CardContent className="p-6 flex flex-col justify-center">
                         <h2 className="font-display text-2xl font-bold text-foreground mb-1 group-hover:text-str-gold transition-colors">
-                          {trainer.fullName}
+                          {trainer.name}
                         </h2>
                         <p className="text-str-gold font-display uppercase tracking-wider text-sm mb-4">
                           {trainer.title}
@@ -110,19 +110,13 @@ export default function TrainersPage() {
                           {trainer.bio}
                         </p>
 
-                        {/* Specialties */}
+                        {/* Specialty */}
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {trainer.specialties ? (
-                            trainer.specialties.slice(0, 3).map((specialty) => (
-                              <Badge key={specialty} variant="outline" size="sm">
-                                {specialty}
-                              </Badge>
-                            ))
-                          ) : trainer.specialty ? (
+                          {trainer.specialty && (
                             <Badge variant="outline" size="sm">
                               {trainer.specialty}
                             </Badge>
-                          ) : null}
+                          )}
                         </div>
 
                         {/* Social & CTA */}

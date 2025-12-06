@@ -42,7 +42,7 @@ export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
           <div className="absolute inset-0">
             <Image
               src={trainer.photo}
-              alt={trainer.fullName}
+              alt={trainer.name}
               fill
               className="object-cover object-top"
               priority
@@ -67,7 +67,7 @@ export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
               className="max-w-2xl"
             >
               <h1 className="text-display-hero font-display font-bold text-foreground mb-2">
-                {trainer.fullName.toUpperCase()}
+                {trainer.name.toUpperCase()}
               </h1>
               <p className="text-str-gold font-display text-xl uppercase tracking-wider mb-4">
                 {trainer.title}
@@ -94,7 +94,7 @@ export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
             {/* Bio & Details */}
             <div className="lg:col-span-2 space-y-8">
               {/* Personal Quote */}
-              {trainer.personalQuote && (
+              {trainer.quote && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -104,7 +104,7 @@ export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
                 >
                   <Quote className="absolute -top-2 -left-2 w-12 h-12 text-str-gold/20" />
                   <blockquote className="text-2xl font-display text-foreground italic pl-8">
-                    "{trainer.personalQuote}"
+                    "{trainer.quote}"
                   </blockquote>
                 </motion.div>
               )}
@@ -117,12 +117,12 @@ export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
                 transition={{ duration: 0.6, delay: 0.1 }}
               >
                 <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-                  About {trainer.fullName.split(' ')[0]}
+                  About {trainer.name.split(' ')[0]}
                 </h2>
                 <p className="text-muted leading-relaxed">{trainer.bio}</p>
               </motion.div>
 
-              {/* Specialties */}
+              {/* Specialty */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -130,14 +130,12 @@ export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-                  Specialties
+                  Specialty
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  {trainer.specialties.map((specialty) => (
-                    <Badge key={specialty} variant="primary">
-                      {specialty}
-                    </Badge>
-                  ))}
+                  <Badge variant="primary">
+                    {trainer.specialty}
+                  </Badge>
                 </div>
               </motion.div>
 
@@ -162,7 +160,7 @@ export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
               </motion.div>
 
               {/* Experience */}
-              {trainer.yearsExperience && (
+              {trainer.experienceYears && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -171,7 +169,7 @@ export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
                   className="flex items-center gap-4 p-6 bg-surface rounded-[2px] border border-border"
                 >
                   <div className="text-4xl font-display font-bold text-str-gold">
-                    {trainer.yearsExperience}+
+                    {trainer.experienceYears}+
                   </div>
                   <div>
                     <div className="font-display font-bold text-foreground">Years of Experience</div>
@@ -209,7 +207,7 @@ export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
               <Card className="bg-str-gold border-str-gold">
                 <CardContent className="p-6 text-center">
                   <h3 className="font-display font-bold text-str-black text-xl mb-2">
-                    Train with {trainer.fullName.split(' ')[0]}
+                    Train with {trainer.name.split(' ')[0]}
                   </h3>
                   <p className="text-str-black/80 text-sm mb-4">
                     Book a personal training session
@@ -256,14 +254,14 @@ export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
                     <div className="relative aspect-[3/4] overflow-hidden">
                       <Image
                         src={otherTrainer.photo}
-                        alt={otherTrainer.fullName}
+                        alt={otherTrainer.name}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-str-black/80 via-transparent to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-4">
                         <h3 className="font-display text-lg font-bold text-foreground group-hover:text-str-gold transition-colors">
-                          {otherTrainer.fullName}
+                          {otherTrainer.name}
                         </h3>
                         <p className="text-sm text-str-gold">{otherTrainer.title}</p>
                       </div>

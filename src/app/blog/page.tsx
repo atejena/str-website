@@ -103,11 +103,11 @@ export default function BlogPage() {
                       <div className="flex items-center gap-6 text-sm text-muted">
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4" />
-                          <span>{featuredPost.author}</span>
+                          <span>{featuredPost.authorName}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4" />
-                          <span>{formatDate(featuredPost.publishedAt || featuredPost.createdAt)}</span>
+                          <span>{formatDate(featuredPost.publishDate || featuredPost.createdAt)}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4" />
@@ -170,7 +170,7 @@ export default function BlogPage() {
                         {post.excerpt}
                       </p>
                       <div className="flex items-center justify-between text-xs text-muted pt-4 border-t border-border mt-auto">
-                        <span>{formatDate(post.publishedAt || post.createdAt)}</span>
+                        <span>{formatDate(post.publishDate || post.createdAt)}</span>
                         <span>{post.readingTimeMinutes} min read</span>
                       </div>
                     </CardContent>

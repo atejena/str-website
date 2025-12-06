@@ -35,7 +35,7 @@ const stats = [
   },
   {
     label: 'Blog Posts',
-    value: blogPosts.filter((p) => p.status === 'published').length,
+    value: blogPosts.filter((p) => p.published).length,
     icon: FileText,
     href: '/admin/blog',
     color: 'text-green-400',

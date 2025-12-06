@@ -22,7 +22,7 @@ export default function AdminSettingsPage() {
           <div className="grid sm:grid-cols-2 gap-4">
             <Input
               label="Business Name"
-              defaultValue={siteSettings.siteName}
+              defaultValue={siteSettings.gymName}
             />
             <Input
               label="Tagline"
@@ -49,7 +49,7 @@ export default function AdminSettingsPage() {
             />
             <Input
               label="Suite/Unit"
-              defaultValue={siteSettings.address.suite || ''}
+              defaultValue=""
             />
           </div>
 
@@ -130,13 +130,13 @@ export default function AdminSettingsPage() {
 
           <Input
             label="Site Title"
-            defaultValue={siteSettings.siteName}
+            defaultValue={siteSettings.gymName}
             helperText="The title that appears in browser tabs and search results"
           />
 
           <Textarea
             label="Meta Description"
-            defaultValue={siteSettings.description}
+            defaultValue={siteSettings.tagline}
             rows={3}
             helperText="A brief description of your website for search engines (150-160 characters)"
           />

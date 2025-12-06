@@ -33,7 +33,7 @@ export default function AdminTrainersPage() {
               <div className="relative aspect-[4/3]">
                 <Image
                   src={trainer.photo}
-                  alt={trainer.fullName}
+                  alt={trainer.name}
                   fill
                   className="object-cover"
                 />
@@ -44,7 +44,7 @@ export default function AdminTrainersPage() {
                 </div>
               </div>
               <CardContent className="p-4">
-                <h3 className="font-display font-bold text-foreground">{trainer.fullName}</h3>
+                <h3 className="font-display font-bold text-foreground">{trainer.name}</h3>
                 <p className="text-sm text-str-gold">{trainer.title}</p>
                 <p className="text-sm text-muted mt-2 line-clamp-2">{trainer.bio}</p>
                 <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-border">

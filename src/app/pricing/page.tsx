@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/Accordion';
-import { membershipPlans, getMembershipFeatures } from '@/data/pricing';
+import { membershipPlans } from '@/data/pricing';
 import { faqs } from '@/data/faqs';
 
 const containerVariants = {
@@ -130,9 +130,9 @@ export default function PricingPage() {
                     </Button>
 
                     {/* Commitment */}
-                    {plan.commitmentMonths && (
+                    {plan.contractMonths && (
                       <p className="text-xs text-center text-muted mt-4">
-                        {plan.commitmentMonths} month minimum commitment
+                        {plan.contractMonths} month minimum commitment
                       </p>
                     )}
                   </CardContent>
