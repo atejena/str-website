@@ -10,14 +10,14 @@ import { Footer } from '@/components/layout/Footer';
 import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/Accordion';
-import { faqs, getFaqsByCategory } from '@/data/faqs';
+import { faqs, getFAQsByCategory } from '@/data/faqs';
 
 const categories = ['Membership', 'Classes', 'Facilities', 'Policies'];
 
 export default function FAQPage() {
   const [selectedCategory, setSelectedCategory] = useState('Membership');
 
-  const categoryFaqs = getFaqsByCategory(selectedCategory);
+  const categoryFaqs = getFAQsByCategory(selectedCategory);
 
   return (
     <>

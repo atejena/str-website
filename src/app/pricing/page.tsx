@@ -96,7 +96,7 @@ export default function PricingPage() {
                       <p className="text-muted text-sm mb-4">{plan.description}</p>
                       <div className="flex items-baseline justify-center gap-1">
                         <span className="text-5xl font-display font-bold text-str-gold">
-                          ${plan.monthlyPrice}
+                          ${plan.priceMonthly}
                         </span>
                         <span className="text-muted">/month</span>
                       </div>
@@ -109,12 +109,14 @@ export default function PricingPage() {
 
                     {/* Features */}
                     <ul className="space-y-3 mb-8">
-                      {plan.features.map((feature, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <Check className="w-5 h-5 text-str-gold flex-shrink-0 mt-0.5" />
-                          <span className="text-muted text-sm">{feature}</span>
-                        </li>
-                      ))}
+                      {plan.features
+                        .filter((feature) => feature.included)
+                        .map((feature, index) => (
+                          <li key={index} className="flex items-start gap-3">
+                            <Check className="w-5 h-5 text-str-gold flex-shrink-0 mt-0.5" />
+                            <span className="text-muted text-sm">{feature.name}</span>
+                          </li>
+                        ))}
                     </ul>
 
                     {/* CTA */}

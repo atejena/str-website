@@ -112,11 +112,17 @@ export default function TrainersPage() {
 
                         {/* Specialties */}
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {trainer.specialties.slice(0, 3).map((specialty) => (
-                            <Badge key={specialty} variant="outline" size="sm">
-                              {specialty}
+                          {trainer.specialties ? (
+                            trainer.specialties.slice(0, 3).map((specialty) => (
+                              <Badge key={specialty} variant="outline" size="sm">
+                                {specialty}
+                              </Badge>
+                            ))
+                          ) : trainer.specialty ? (
+                            <Badge variant="outline" size="sm">
+                              {trainer.specialty}
                             </Badge>
-                          ))}
+                          ) : null}
                         </div>
 
                         {/* Social & CTA */}
