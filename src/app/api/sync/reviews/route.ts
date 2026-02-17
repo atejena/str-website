@@ -185,8 +185,9 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Review sync error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Internal server error during review sync' },
+      { error: 'Internal server error during review sync', details: errorMessage },
       { status: 500 }
     )
   }
