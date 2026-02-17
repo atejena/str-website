@@ -43,7 +43,7 @@ export function AdminSidebar({ isOpen = true, onClose }: AdminSidebarProps) {
       className={cn(
         'fixed inset-y-0 left-0 z-50 w-64 bg-surface border-r border-border',
         'transform transition-transform duration-200 ease-in-out',
-        'lg:relative lg:translate-x-0',
+        'lg:relative lg:translate-x-0 lg:min-h-screen',
         isOpen ? 'translate-x-0' : '-translate-x-full'
       )}
     >

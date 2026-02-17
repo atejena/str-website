@@ -20,7 +20,7 @@ export default function AdminLayoutClient({
         />
       )}
 
-      <div className="flex">
+      <div className="flex min-h-screen">
         {/* Sidebar */}
         <AdminSidebar
           isOpen={sidebarOpen}
