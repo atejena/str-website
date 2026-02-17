@@ -49,7 +49,8 @@ export default function ProgrammingPageClient({ whiteboardUrl }: ProgrammingPage
                 src={whiteboardUrl}
                 title="TrainHeroic Whiteboard"
                 className="w-full border-0"
-                style={{ minHeight: '80vh' }}
+                style={{ minHeight: '800px' }}
+                frameBorder={0}
                 allow="fullscreen"
                 loading="lazy"
               />

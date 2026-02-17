@@ -28,5 +28,29 @@ export default async function GalleryPage() {
 
   const galleryImages: GalleryImage[] = (rawImages || []).map(mapGalleryImage);
 
-  return <GalleryPageClient galleryImages={galleryImages} />;
+  // Fetch Instagram URL
+  const { data: instagramSetting } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'social_instagram')
+    .single();
+
+  const instagramUrl = (instagramSetting?.value as string) || '';
+
+  // Fetch Instagram embed code
+  const { data: embedSetting } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'instagram_feed_embed')
+    .single();
+
+  const instagramFeedEmbed = (embedSetting?.value as string) || '';
+
+  return (
+    <GalleryPageClient
+      galleryImages={galleryImages}
+      instagramUrl={instagramUrl || undefined}
+      instagramFeedEmbed={instagramFeedEmbed || undefined}
+    />
+  );
 }

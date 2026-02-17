@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Settings as SettingsIcon } from 'lucide-react'
+import { Save, Settings as SettingsIcon, RefreshCw } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -24,6 +24,8 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Settings>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState<Record<string, unknown> | null>(null)
 
   const loadSettings = async () => {
     try {
@@ -271,6 +273,32 @@ export default function AdminSettingsPage() {
                 rows={3}
                 placeholder="https://www.google.com/maps/embed?pb=..."
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Google Place ID</label>
+              <Input
+                value={settings.google_place_id || ''}
+                onChange={(e) => updateSetting('google_place_id', e.target.value)}
+                placeholder="ChIJ..."
+              />
+              <p className="text-xs text-muted mt-1">
+                Used for &quot;Leave a Review&quot; and &quot;See All Reviews on Google&quot; links. Find your Place ID at{' '}
+                <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener noreferrer" className="text-str-gold underline">
+                  Google Place ID Finder
+                </a>.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Instagram Feed Embed Code</label>
+              <Textarea
+                value={settings.instagram_feed_embed || ''}
+                onChange={(e) => updateSetting('instagram_feed_embed', e.target.value)}
+                rows={5}
+                placeholder="Paste widget embed code from SnapWidget, Elfsight, etc."
+              />
+              <p className="text-xs text-muted mt-1">
+                Paste an Instagram feed widget embed code (from SnapWidget, Elfsight, etc.) to display an Instagram feed on the gallery page.
+              </p>
             </div>
           </div>
         </CardContent>

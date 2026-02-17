@@ -1,6 +1,6 @@
 'use client';
 
-import { Star } from 'lucide-react';
+import { Star, ExternalLink, PenLine } from 'lucide-react';
 import { Container } from '@/components/layout/Container';
 import { useEffect, useRef } from 'react';
 
@@ -14,9 +14,10 @@ interface Testimonial {
 
 interface Props {
   testimonials: Testimonial[];
+  googlePlaceId?: string;
 }
 
-export function TestimonialsScrolling({ testimonials }: Props) {
+export function TestimonialsScrolling({ testimonials, googlePlaceId }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,6 +92,32 @@ export function TestimonialsScrolling({ testimonials }: Props) {
           ))}
         </div>
       </div>
+
+      {/* Google Review CTAs */}
+      {googlePlaceId && (
+        <Container>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
+            <a
+              href={`https://search.google.com/local/writereview?placeid=${googlePlaceId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-str-gold text-str-black font-display font-bold uppercase tracking-wider text-sm rounded-[2px] hover:bg-str-gold/90 transition-colors cursor-pointer"
+            >
+              <PenLine className="w-4 h-4" />
+              Leave a Review
+            </a>
+            <a
+              href={`https://search.google.com/local/reviews?placeid=${googlePlaceId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 border border-str-gold text-str-gold font-display font-bold uppercase tracking-wider text-sm rounded-[2px] hover:bg-str-gold/10 transition-colors cursor-pointer"
+            >
+              <ExternalLink className="w-4 h-4" />
+              See All Reviews on Google
+            </a>
+          </div>
+        </Container>
+      )}
 
       {/* CSS for infinite scroll animation */}
       <style jsx>{`

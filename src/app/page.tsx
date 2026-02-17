@@ -44,6 +44,24 @@ export default async function Home() {
     embed_url?: string;
   } | null;
 
+  // Fetch Google Place ID for review links
+  const { data: googlePlaceIdSetting } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'google_place_id')
+    .single();
+
+  const googlePlaceId = (googlePlaceIdSetting?.value as string) || '';
+
+  // Fetch Instagram URL for gallery preview
+  const { data: instagramSetting } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'social_instagram')
+    .single();
+
+  const instagramUrl = (instagramSetting?.value as string) || '';
+
   return (
     <>
       <Header />
@@ -68,11 +86,11 @@ export default async function Home() {
 
         {/* 7. Scrolling Reviews */}
         {testimonials && testimonials.length > 0 && (
-          <TestimonialsScrolling testimonials={testimonials} />
+          <TestimonialsScrolling testimonials={testimonials} googlePlaceId={googlePlaceId || undefined} />
         )}
 
         {/* 8. Photos & Videos Gallery Preview */}
-        <GalleryPreview />
+        <GalleryPreview instagramUrl={instagramUrl || undefined} />
       </main>
 
       {/* 9. Footer */}
