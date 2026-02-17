@@ -12,5 +12,7 @@ export { GalleryPreview } from './GalleryPreview';
 export { Hero } from './Hero';
 export { ValueProposition } from './ValueProposition';
 export { ClassesPreview } from './ClassesPreview';
+export { ClassesPreviewClient } from './ClassesPreviewClient';
 export { TestimonialsCarousel } from './TestimonialsCarousel';
+export { TestimonialsCarouselClient } from './TestimonialsCarouselClient';
 export { CTABanner } from './CTABanner';

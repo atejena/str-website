@@ -1,279 +1,122 @@
-'use client';
-
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Instagram, Award, Quote, ArrowRight } from 'lucide-react';
-import { use } from 'react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { Section } from '@/components/layout/Section';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { trainers, getTrainerBySlug } from '@/data/trainers';
-import { classes } from '@/data/classes';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { Trainer, GymClass } from '@/types';
+import TrainerDetailClient from './TrainerDetailClient';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapDbTrainer(row: any): Trainer {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    title: row.title,
+    specialty: row.specialty,
+    bio: row.bio,
+    shortBio: row.short_bio ?? '',
+    certifications: row.certifications ?? [],
+    experienceYears: row.experience_years ?? 0,
+    photo: row.photo,
+    email: row.email,
+    instagram: row.instagram,
+    quote: row.quote,
+    featured: row.featured ?? false,
+    active: row.active ?? true,
+    sortOrder: row.sort_order ?? 0,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapDbClass(row: any): GymClass {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description,
+    shortDescription: row.short_description ?? '',
+    instructorId: row.instructor_id,
+    category: row.category,
+    difficultyLevel: row.difficulty_level,
+    durationMinutes: row.duration_minutes,
+    maxCapacity: row.max_capacity,
+    caloriesBurned: row.calories_burned,
+    equipmentNeeded: row.equipment_needed ?? [],
+    benefits: row.benefits ?? [],
+    featuredImage: row.featured_image ?? '',
+    galleryImages: row.gallery_images ?? [],
+    priceDropIn: row.price_drop_in,
+    includedInMembership: row.included_in_membership ?? false,
+    featured: row.featured ?? false,
+    active: row.active ?? true,
+    sortOrder: row.sort_order ?? 0,
+    metaTitle: row.meta_title,
+    metaDescription: row.meta_description,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 interface TrainerDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default function TrainerDetailPage({ params }: TrainerDetailPageProps) {
-  const { slug } = use(params);
-  const trainer = getTrainerBySlug(slug);
+export default async function TrainerDetailPage({ params }: TrainerDetailPageProps) {
+  const { slug } = await params;
+  const supabase = await createServerSupabaseClient();
 
-  if (!trainer) {
+  // Fetch the specific trainer
+  const { data: trainerRow } = await supabase
+    .from('trainers')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (!trainerRow) {
     notFound();
   }
 
-  // Get classes this trainer teaches (placeholder logic)
-  const trainerClasses = classes.filter((c) => c.active).slice(0, 3);
+  const trainer = mapDbTrainer(trainerRow);
 
-  // Get other trainers
-  const otherTrainers = trainers.filter((t) => t.id !== trainer.id && t.active).slice(0, 3);
+  // Fetch classes this trainer teaches (by instructor_id)
+  const { data: trainerClassRows } = await supabase
+    .from('gym_classes')
+    .select('*')
+    .eq('instructor_id', trainer.id)
+    .eq('active', true)
+    .order('sort_order')
+    .limit(5);
+
+  let trainerClasses: GymClass[] = (trainerClassRows ?? []).map(mapDbClass);
+
+  // If no classes assigned via instructor_id, fetch first few active classes as placeholder
+  if (trainerClasses.length === 0) {
+    const { data: fallbackClassRows } = await supabase
+      .from('gym_classes')
+      .select('*')
+      .eq('active', true)
+      .order('sort_order')
+      .limit(3);
+
+    trainerClasses = (fallbackClassRows ?? []).map(mapDbClass);
+  }
+
+  // Fetch other trainers
+  const { data: otherTrainerRows } = await supabase
+    .from('trainers')
+    .select('*')
+    .neq('id', trainer.id)
+    .eq('active', true)
+    .order('sort_order')
+    .limit(3);
+
+  const otherTrainers: Trainer[] = (otherTrainerRows ?? []).map(mapDbTrainer);
 
   return (
-    <>
-      <Header />
-      <main id="main-content">
-        {/* Hero Section */}
-        <section className="relative min-h-[60vh] flex items-end overflow-hidden">
-          <div className="absolute inset-0">
-            <Image
-              src={trainer.photo}
-              alt={trainer.name}
-              fill
-              className="object-cover object-top"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-str-black via-str-black/50 to-transparent" />
-          </div>
-
-          <div className="container-custom relative z-10 py-12">
-            {/* Back Link */}
-            <Link
-              href="/trainers"
-              className="inline-flex items-center gap-2 text-muted hover:text-str-gold transition-colors mb-6"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="font-display text-sm uppercase tracking-wider">All Coaches</span>
-            </Link>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="max-w-2xl"
-            >
-              <h1 className="text-display-hero font-display font-bold text-foreground mb-2">
-                {trainer.name.toUpperCase()}
-              </h1>
-              <p className="text-str-gold font-display text-xl uppercase tracking-wider mb-4">
-                {trainer.title}
-              </p>
-
-              {trainer.instagram && (
-                <a
-                  href={`https://instagram.com/${trainer.instagram}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-muted hover:text-str-gold transition-colors"
-                >
-                  <Instagram className="w-5 h-5" />
-                  <span>@{trainer.instagram}</span>
-                </a>
-              )}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Main Content */}
-        <Section background="default">
-          <div className="grid lg:grid-cols-3 gap-12">
-            {/* Bio & Details */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Personal Quote */}
-              {trainer.quote && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                  className="relative"
-                >
-                  <Quote className="absolute -top-2 -left-2 w-12 h-12 text-str-gold/20" />
-                  <blockquote className="text-2xl font-display text-foreground italic pl-8">
-                    "{trainer.quote}"
-                  </blockquote>
-                </motion.div>
-              )}
-
-              {/* Bio */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-              >
-                <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-                  About {trainer.name.split(' ')[0]}
-                </h2>
-                <p className="text-muted leading-relaxed">{trainer.bio}</p>
-              </motion.div>
-
-              {/* Specialty */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-                  Specialty
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="primary">
-                    {trainer.specialty}
-                  </Badge>
-                </div>
-              </motion.div>
-
-              {/* Certifications */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-                  Certifications
-                </h2>
-                <ul className="space-y-3">
-                  {trainer.certifications.map((cert) => (
-                    <li key={cert} className="flex items-center gap-3">
-                      <Award className="w-5 h-5 text-str-gold flex-shrink-0" />
-                      <span className="text-muted">{cert}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-
-              {/* Experience */}
-              {trainer.experienceYears && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  className="flex items-center gap-4 p-6 bg-surface rounded-[2px] border border-border"
-                >
-                  <div className="text-4xl font-display font-bold text-str-gold">
-                    {trainer.experienceYears}+
-                  </div>
-                  <div>
-                    <div className="font-display font-bold text-foreground">Years of Experience</div>
-                    <div className="text-sm text-muted">Helping clients achieve their goals</div>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Classes Card */}
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="font-display font-bold text-foreground mb-4">
-                    Classes Taught
-                  </h3>
-                  <ul className="space-y-3">
-                    {trainerClasses.map((gymClass) => (
-                      <li key={gymClass.id}>
-                        <Link
-                          href={`/classes/${gymClass.slug}`}
-                          className="flex items-center justify-between py-2 border-b border-border last:border-0 hover:text-str-gold transition-colors"
-                        >
-                          <span className="text-foreground">{gymClass.name}</span>
-                          <ArrowRight className="w-4 h-4 text-muted" />
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              {/* Book Session Card */}
-              <Card className="bg-str-gold border-str-gold">
-                <CardContent className="p-6 text-center">
-                  <h3 className="font-display font-bold text-str-black text-xl mb-2">
-                    Train with {trainer.name.split(' ')[0]}
-                  </h3>
-                  <p className="text-str-black/80 text-sm mb-4">
-                    Book a personal training session
-                  </p>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="w-full bg-str-black text-white hover:bg-str-black/90"
-                  >
-                    <Link href="/contact">Book Session</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </Section>
-
-        {/* Other Trainers */}
-        {otherTrainers.length > 0 && (
-          <Section background="surface">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-12"
-            >
-              <span className="text-sm font-display font-bold uppercase tracking-widest text-str-gold mb-4 block">
-                Meet More Coaches
-              </span>
-              <h2 className="text-display-section font-display font-bold text-foreground">
-                OTHER <span className="text-str-gold">TRAINERS</span>
-              </h2>
-            </motion.div>
-
-            <div className="grid gap-6 md:grid-cols-3">
-              {otherTrainers.map((otherTrainer) => (
-                <Link
-                  key={otherTrainer.id}
-                  href={`/trainers/${otherTrainer.slug}`}
-                  className="block group"
-                >
-                  <Card hover className="overflow-hidden">
-                    <div className="relative aspect-[3/4] overflow-hidden">
-                      <Image
-                        src={otherTrainer.photo}
-                        alt={otherTrainer.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-str-black/80 via-transparent to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <h3 className="font-display text-lg font-bold text-foreground group-hover:text-str-gold transition-colors">
-                          {otherTrainer.name}
-                        </h3>
-                        <p className="text-sm text-str-gold">{otherTrainer.title}</p>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </Section>
-        )}
-      </main>
-      <Footer />
-    </>
+    <TrainerDetailClient
+      trainer={trainer}
+      trainerClasses={trainerClasses}
+      otherTrainers={otherTrainers}
+    />
   );
 }

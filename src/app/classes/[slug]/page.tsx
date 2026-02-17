@@ -1,326 +1,158 @@
-'use client';
-
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Clock, Users, Flame, CheckCircle, ArrowLeft, Calendar, DollarSign } from 'lucide-react';
-import { use } from 'react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { Section } from '@/components/layout/Section';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { getClassBySlug, getActiveClasses, getScheduleForClass } from '@/data/classes';
-import { trainers } from '@/data/trainers';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { GymClass, ClassScheduleItem, Trainer } from '@/types';
+import ClassDetailClient from './ClassDetailClient';
+
+// Helper to map snake_case DB rows to camelCase GymClass type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapDbClass(row: any): GymClass {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description,
+    shortDescription: row.short_description ?? '',
+    instructorId: row.instructor_id,
+    category: row.category,
+    difficultyLevel: row.difficulty_level,
+    durationMinutes: row.duration_minutes,
+    maxCapacity: row.max_capacity,
+    caloriesBurned: row.calories_burned,
+    equipmentNeeded: row.equipment_needed ?? [],
+    benefits: row.benefits ?? [],
+    featuredImage: row.featured_image ?? '',
+    galleryImages: row.gallery_images ?? [],
+    priceDropIn: row.price_drop_in,
+    includedInMembership: row.included_in_membership ?? false,
+    featured: row.featured ?? false,
+    active: row.active ?? true,
+    sortOrder: row.sort_order ?? 0,
+    metaTitle: row.meta_title,
+    metaDescription: row.meta_description,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapDbSchedule(row: any): ClassScheduleItem {
+  return {
+    id: row.id,
+    classId: row.class_id,
+    instructorId: row.instructor_id,
+    dayOfWeek: row.day_of_week,
+    startTime: row.start_time,
+    endTime: row.end_time,
+    room: row.room,
+    recurring: row.recurring ?? true,
+    effectiveFrom: row.effective_from,
+    effectiveUntil: row.effective_until,
+    cancelled: row.cancelled ?? false,
+    cancellationReason: row.cancellation_reason,
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapDbTrainer(row: any): Trainer {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    title: row.title,
+    specialty: row.specialty,
+    bio: row.bio,
+    shortBio: row.short_bio ?? '',
+    certifications: row.certifications ?? [],
+    experienceYears: row.experience_years ?? 0,
+    photo: row.photo,
+    email: row.email,
+    instagram: row.instagram,
+    quote: row.quote,
+    featured: row.featured ?? false,
+    active: row.active ?? true,
+    sortOrder: row.sort_order ?? 0,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 interface ClassDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default function ClassDetailPage({ params }: ClassDetailPageProps) {
-  const { slug } = use(params);
-  const gymClass = getClassBySlug(slug);
+export default async function ClassDetailPage({ params }: ClassDetailPageProps) {
+  const { slug } = await params;
+  const supabase = await createServerSupabaseClient();
 
-  if (!gymClass) {
+  // Fetch the specific class
+  const { data: classRow } = await supabase
+    .from('gym_classes')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (!classRow) {
     notFound();
   }
 
-  const classSchedule = getScheduleForClass(gymClass.id);
-  const allClasses = getActiveClasses();
-  const relatedClasses = allClasses
-    .filter((c) => c.category === gymClass.category && c.id !== gymClass.id)
-    .slice(0, 3);
+  const gymClass = mapDbClass(classRow);
 
-  // Get a random trainer for this class (placeholder until real instructor assignments)
-  const classInstructor = trainers[0];
+  // Fetch schedule for this class
+  const { data: scheduleRows } = await supabase
+    .from('class_schedule')
+    .select('*')
+    .eq('class_id', gymClass.id)
+    .eq('cancelled', false);
+
+  const classSchedule: ClassScheduleItem[] = (scheduleRows ?? []).map(mapDbSchedule);
+
+  // Fetch instructor if instructor_id is set
+  let classInstructor: Trainer | null = null;
+  if (gymClass.instructorId) {
+    const { data: trainerRow } = await supabase
+      .from('trainers')
+      .select('*')
+      .eq('id', gymClass.instructorId)
+      .single();
+
+    if (trainerRow) {
+      classInstructor = mapDbTrainer(trainerRow);
+    }
+  }
+
+  // If no specific instructor, fetch the first active trainer as fallback
+  if (!classInstructor) {
+    const { data: fallbackTrainer } = await supabase
+      .from('trainers')
+      .select('*')
+      .eq('active', true)
+      .order('sort_order')
+      .limit(1)
+      .single();
+
+    if (fallbackTrainer) {
+      classInstructor = mapDbTrainer(fallbackTrainer);
+    }
+  }
+
+  // Fetch related classes (same category, excluding current)
+  const { data: relatedRows } = await supabase
+    .from('gym_classes')
+    .select('*')
+    .eq('category', gymClass.category)
+    .eq('active', true)
+    .neq('id', gymClass.id)
+    .order('sort_order')
+    .limit(3);
+
+  const relatedClasses: GymClass[] = (relatedRows ?? []).map(mapDbClass);
 
   return (
-    <>
-      <Header />
-      <main id="main-content">
-        {/* Hero Section */}
-        <section className="relative min-h-[50vh] flex items-end overflow-hidden">
-          <div className="absolute inset-0">
-            <Image
-              src={gymClass.featuredImage}
-              alt={gymClass.name}
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-str-black via-str-black/60 to-str-black/30" />
-          </div>
-
-          <div className="container-custom relative z-10 py-12">
-            {/* Back Link */}
-            <Link
-              href="/classes"
-              className="inline-flex items-center gap-2 text-muted hover:text-str-gold transition-colors mb-6"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="font-display text-sm uppercase tracking-wider">All Classes</span>
-            </Link>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant="primary">{gymClass.category}</Badge>
-                <Badge variant="secondary">{gymClass.difficultyLevel}</Badge>
-              </div>
-
-              <h1 className="text-display-hero font-display font-bold text-foreground mb-4">
-                {gymClass.name.toUpperCase()}
-              </h1>
-
-              <p className="text-body-lead text-muted max-w-2xl">
-                {gymClass.shortDescription}
-              </p>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Quick Stats */}
-        <Section background="surface">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-str-gold/10 mb-3">
-                <Clock className="w-6 h-6 text-str-gold" />
-              </div>
-              <div className="text-2xl font-display font-bold text-foreground">
-                {gymClass.durationMinutes} min
-              </div>
-              <div className="text-sm text-muted">Duration</div>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-str-gold/10 mb-3">
-                <Users className="w-6 h-6 text-str-gold" />
-              </div>
-              <div className="text-2xl font-display font-bold text-foreground">
-                {gymClass.maxCapacity}
-              </div>
-              <div className="text-sm text-muted">Max Capacity</div>
-            </div>
-            {gymClass.caloriesBurned && (
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-str-gold/10 mb-3">
-                  <Flame className="w-6 h-6 text-str-gold" />
-                </div>
-                <div className="text-2xl font-display font-bold text-foreground">
-                  {gymClass.caloriesBurned}
-                </div>
-                <div className="text-sm text-muted">Calories Burned</div>
-              </div>
-            )}
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-str-gold/10 mb-3">
-                <DollarSign className="w-6 h-6 text-str-gold" />
-              </div>
-              <div className="text-2xl font-display font-bold text-foreground">
-                {gymClass.includedInMembership ? 'Included' : `$${gymClass.priceDropIn}`}
-              </div>
-              <div className="text-sm text-muted">
-                {gymClass.includedInMembership ? 'In Membership' : 'Drop-in Rate'}
-              </div>
-            </div>
-          </div>
-        </Section>
-
-        {/* Main Content */}
-        <Section background="default">
-          <div className="grid lg:grid-cols-3 gap-12">
-            {/* Description & Benefits */}
-            <div className="lg:col-span-2 space-y-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-              >
-                <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-                  About This Class
-                </h2>
-                <p className="text-muted leading-relaxed">{gymClass.description}</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-              >
-                <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-                  Benefits
-                </h2>
-                <ul className="grid sm:grid-cols-2 gap-3">
-                  {gymClass.benefits.map((benefit) => (
-                    <li key={benefit} className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-str-gold flex-shrink-0 mt-0.5" />
-                      <span className="text-muted">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-                  Equipment Used
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {gymClass.equipmentNeeded.map((equipment) => (
-                    <Badge key={equipment} variant="outline">
-                      {equipment}
-                    </Badge>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Schedule Card */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Calendar className="w-5 h-5 text-str-gold" />
-                    <h3 className="font-display font-bold text-foreground">
-                      Class Schedule
-                    </h3>
-                  </div>
-                  {classSchedule.length > 0 ? (
-                    <ul className="space-y-3">
-                      {classSchedule.map((schedule) => (
-                        <li
-                          key={schedule.id}
-                          className="flex justify-between items-center py-2 border-b border-border last:border-0"
-                        >
-                          <span className="text-foreground font-medium">
-                            {schedule.dayOfWeek}
-                          </span>
-                          <span className="text-str-gold font-mono text-sm">
-                            {schedule.startTime} - {schedule.endTime}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-muted text-sm">
-                      Contact us for scheduling options.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Instructor Card */}
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="font-display font-bold text-foreground mb-4">
-                    Class Instructor
-                  </h3>
-                  <Link
-                    href={`/trainers/${classInstructor.slug}`}
-                    className="flex items-center gap-4 group"
-                  >
-                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-str-gold">
-                      <Image
-                        src={classInstructor.photo}
-                        alt={classInstructor.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <div className="font-display font-bold text-foreground group-hover:text-str-gold transition-colors">
-                        {classInstructor.name}
-                      </div>
-                      <div className="text-sm text-str-gold">{classInstructor.title}</div>
-                    </div>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* CTA Card */}
-              <Card className="bg-str-gold border-str-gold">
-                <CardContent className="p-6 text-center">
-                  <h3 className="font-display font-bold text-str-black text-xl mb-2">
-                    Ready to Try?
-                  </h3>
-                  <p className="text-str-black/80 text-sm mb-4">
-                    Book your free trial class today
-                  </p>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="w-full bg-str-black text-white hover:bg-str-black/90"
-                  >
-                    <Link href="/contact">Book Free Trial</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </Section>
-
-        {/* Related Classes */}
-        {relatedClasses.length > 0 && (
-          <Section background="surface">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-12"
-            >
-              <span className="text-sm font-display font-bold uppercase tracking-widest text-str-gold mb-4 block">
-                You Might Also Like
-              </span>
-              <h2 className="text-display-section font-display font-bold text-foreground">
-                RELATED <span className="text-str-gold">CLASSES</span>
-              </h2>
-            </motion.div>
-
-            <div className="grid gap-6 md:grid-cols-3">
-              {relatedClasses.map((relatedClass) => (
-                <Link
-                  key={relatedClass.id}
-                  href={`/classes/${relatedClass.slug}`}
-                  className="block group"
-                >
-                  <Card hover className="overflow-hidden h-full">
-                    <div className="relative aspect-[16/10] overflow-hidden">
-                      <Image
-                        src={relatedClass.featuredImage}
-                        alt={relatedClass.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-str-black/80 via-str-black/20 to-transparent" />
-                    </div>
-                    <CardContent className="p-5">
-                      <h3 className="font-display text-lg font-bold text-foreground mb-2 group-hover:text-str-gold transition-colors">
-                        {relatedClass.name}
-                      </h3>
-                      <p className="text-sm text-muted line-clamp-2">
-                        {relatedClass.shortDescription}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </Section>
-        )}
-      </main>
-      <Footer />
-    </>
+    <ClassDetailClient
+      gymClass={gymClass}
+      classSchedule={classSchedule}
+      classInstructor={classInstructor}
+      relatedClasses={relatedClasses}
+    />
   );
 }
