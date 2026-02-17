@@ -8,11 +8,12 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 export async function GalleryPreview() {
   const supabase = await createServerSupabaseClient();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: galleryItems } = await supabase
     .from('gallery_images')
     .select('*')
     .order('sort_order')
-    .limit(8);
+    .limit(8) as { data: any[] | null };
 
   if (!galleryItems || galleryItems.length === 0) {
     return null;

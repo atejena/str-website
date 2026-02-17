@@ -683,7 +683,8 @@ export async function deleteCareer(id: string) {
 
 // ==================== LEADS ====================
 
-export async function getLeads() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getLeads(): Promise<any[]> {
   const supabase = await createAdminClient()
   const { data, error } = await supabase
     .from('contact_submissions')
@@ -691,7 +692,7 @@ export async function getLeads() {
     .order('created_at', { ascending: false })
   
   if (error) throw error
-  return data
+  return data || []
 }
 
 export async function updateLead(id: string, updates: { read?: boolean; responded?: boolean; notes?: string }) {
@@ -735,7 +736,7 @@ export async function getSettings() {
   
   // Convert array to object for easier access
   const settings: Record<string, any> = {}
-  data?.forEach(setting => {
+  data?.forEach((setting: { key: string; value: unknown }) => {
     settings[setting.key] = setting.value
   })
   

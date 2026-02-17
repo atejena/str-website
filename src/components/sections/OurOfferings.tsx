@@ -8,21 +8,23 @@ export async function OurOfferings() {
   const supabase = await createServerSupabaseClient();
 
   // Fetch the two main offerings
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: mainOfferings } = await supabase
     .from('gym_classes')
     .select('*')
     .in('slug', ['semi-private-training', 'group-training'])
     .eq('active', true)
-    .order('sort_order');
+    .order('sort_order') as { data: any[] | null };
 
   // Fetch other classes
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: otherClasses } = await supabase
     .from('gym_classes')
     .select('*')
     .not('slug', 'in', '(semi-private-training,group-training)')
     .eq('active', true)
     .order('sort_order')
-    .limit(4);
+    .limit(4) as { data: any[] | null };
 
   return (
     <section className="py-16 md:py-24 bg-str-black">
