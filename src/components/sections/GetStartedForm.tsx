@@ -137,6 +137,13 @@ export function GetStartedForm({ jotform, ghlFormUrl }: GetStartedFormProps = {}
                   />
                 </div>
 
+                {/* SMS Consent */}
+                <div className="text-xs text-concrete/70 leading-relaxed">
+                  By providing your phone number, you agree to receive text messages from STR - Strength Through Resilience regarding your inquiry and our services. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe, HELP for help. View our{' '}
+                  <a href="/terms" className="text-str-gold underline hover:text-str-gold/80">Terms of Service</a>{' '}and{' '}
+                  <a href="/privacy" className="text-str-gold underline hover:text-str-gold/80">Privacy Policy</a>.
+                </div>
+
                 <input type="hidden" name="subject" value="New Get Started Inquiry" />
                 <input type="hidden" name="source_page" value="home" />
 
