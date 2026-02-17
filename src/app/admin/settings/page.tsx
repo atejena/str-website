@@ -58,6 +58,28 @@ export default function AdminSettingsPage() {
     setSettings(prev => ({ ...prev, [key]: value }))
   }
 
+  const triggerSync = async (endpoint: 'sync' | 'sync/reviews' | 'sync/instagram') => {
+    const syncKey = settings.sync_secret_key || prompt('Enter your SYNC_SECRET_KEY:')
+    if (!syncKey) return
+
+    setSyncing(true)
+    setSyncResult(null)
+    try {
+      const res = await fetch(`/api/${endpoint}?key=${encodeURIComponent(syncKey)}`)
+      const data = await res.json()
+      setSyncResult(data)
+      if (data.success || data.reviews || data.instagram) {
+        toast.success('Sync completed successfully')
+      } else {
+        toast.error(data.error || 'Sync failed')
+      }
+    } catch (error) {
+      toast.error('Sync request failed')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   if (loading) {
     return <div className="text-center py-12">Loading...</div>
   }
@@ -229,6 +251,17 @@ export default function AdminSettingsPage() {
                 placeholder="https://tiktok.com/@strgym"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Instagram Handle</label>
+              <Input
+                value={settings.instagram_handle || ''}
+                onChange={(e) => updateSetting('instagram_handle', e.target.value)}
+                placeholder="trainwithstr"
+              />
+              <p className="text-xs text-muted mt-1">
+                Your Instagram username (without @). Used for auto-sync and display.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -279,10 +312,10 @@ export default function AdminSettingsPage() {
               <Input
                 value={settings.google_place_id || ''}
                 onChange={(e) => updateSetting('google_place_id', e.target.value)}
-                placeholder="ChIJ..."
+                placeholder="ChIJUbJkArezw4kRrIcYZFBjQlk"
               />
               <p className="text-xs text-muted mt-1">
-                Used for &quot;Leave a Review&quot; and &quot;See All Reviews on Google&quot; links. Find your Place ID at{' '}
+                Used for Google Reviews auto-sync, &quot;Leave a Review&quot; and &quot;See All Reviews on Google&quot; links. Default: STR Fitness Cranford NJ. Find your Place ID at{' '}
                 <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener noreferrer" className="text-str-gold underline">
                   Google Place ID Finder
                 </a>.
@@ -300,6 +333,66 @@ export default function AdminSettingsPage() {
                 Paste an Instagram feed widget embed code (from SnapWidget, Elfsight, etc.) to display an Instagram feed on the gallery page.
               </p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Auto-Sync Controls */}
+      <Card>
+        <CardContent className="p-6">
+          <h2 className="text-xl font-display font-bold text-foreground mb-6 flex items-center gap-2">
+            <RefreshCw className="w-5 h-5" />
+            Auto-Sync
+          </h2>
+          <p className="text-sm text-muted mb-6">
+            Sync Google Reviews and Instagram posts to your website. Requires <code className="bg-surface px-1 py-0.5 rounded text-xs">SYNC_SECRET_KEY</code>, <code className="bg-surface px-1 py-0.5 rounded text-xs">GOOGLE_PLACES_API_KEY</code>, and optionally <code className="bg-surface px-1 py-0.5 rounded text-xs">INSTAGRAM_ACCESS_TOKEN</code> environment variables on Vercel.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Sync Secret Key (for testing from browser)</label>
+              <Input
+                type="password"
+                value={settings.sync_secret_key || ''}
+                onChange={(e) => updateSetting('sync_secret_key', e.target.value)}
+                placeholder="Paste your SYNC_SECRET_KEY here to test sync"
+              />
+              <p className="text-xs text-muted mt-1">
+                This is NOT saved to the database — only used to test sync from this page. The actual key is set as an env var.
+              </p>
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              <Button
+                variant="outline"
+                onClick={() => triggerSync('sync/reviews')}
+                disabled={syncing}
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+                Sync Google Reviews
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => triggerSync('sync/instagram')}
+                disabled={syncing}
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+                Sync Instagram Posts
+              </Button>
+              <Button
+                onClick={() => triggerSync('sync')}
+                disabled={syncing}
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+                Sync All
+              </Button>
+            </div>
+            {syncResult && (
+              <div className="bg-surface border border-border rounded p-4 mt-4">
+                <h3 className="text-sm font-bold mb-2">Sync Result:</h3>
+                <pre className="text-xs text-muted overflow-auto max-h-48 whitespace-pre-wrap">
+                  {JSON.stringify(syncResult, null, 2)}
+                </pre>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

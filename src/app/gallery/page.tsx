@@ -46,11 +46,21 @@ export default async function GalleryPage() {
 
   const instagramFeedEmbed = (embedSetting?.value as string) || '';
 
+  // Fetch Instagram handle
+  const { data: handleSetting } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'instagram_handle')
+    .single();
+
+  const instagramHandle = (handleSetting?.value as string) || '';
+
   return (
     <GalleryPageClient
       galleryImages={galleryImages}
       instagramUrl={instagramUrl || undefined}
       instagramFeedEmbed={instagramFeedEmbed || undefined}
+      instagramHandle={instagramHandle || undefined}
     />
   );
 }

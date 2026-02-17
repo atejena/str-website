@@ -8,7 +8,7 @@ export type DayOfWeek = 'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursda
 
 export type FAQCategory = 'Membership' | 'Classes' | 'Facilities' | 'Policies';
 
-export type GalleryCategory = 'Facility' | 'Classes' | 'Events' | 'Transformations';
+export type GalleryCategory = 'Facility' | 'Classes' | 'Events' | 'Transformations' | 'Instagram';
 
 export type BlogCategory =
   | 'Workout Tips'
