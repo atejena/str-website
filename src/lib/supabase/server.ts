@@ -64,25 +64,17 @@ export async function createAdminClient() {
     return createServerSupabaseClient()
   }
 
-  const cookieStore = await cookies()
+  // Use @supabase/supabase-js createClient with the secret key
+  // This bypasses RLS when using the service role / secret key
+  const { createClient } = await import('@supabase/supabase-js')
 
-  return createServerClient(
+  return createClient(
     SUPABASE_URL,
     SUPABASE_SECRET,
     {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
-          } catch {
-            // Server component - can't set cookies
-          }
-        },
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
       },
     }
   )
