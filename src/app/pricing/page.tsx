@@ -159,7 +159,8 @@ export default function PricingPage() {
             </h2>
           </motion.div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+            <p className="text-sm text-muted text-center mb-4 md:hidden">← Scroll to compare plans →</p>
             <table className="w-full min-w-[600px]">
               <thead>
                 <tr className="border-b border-border">

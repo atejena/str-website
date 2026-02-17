@@ -92,7 +92,7 @@ export default function LoginForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@str.com"
+              placeholder="you@example.com"
               required
               className="w-full"
               disabled={loading}

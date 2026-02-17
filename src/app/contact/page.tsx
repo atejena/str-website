@@ -244,12 +244,16 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-display font-bold text-foreground mb-1">Phone</h3>
-                      <a
-                        href={`tel:${siteSettings.phone}`}
-                        className="text-muted hover:text-str-gold transition-colors"
-                      >
-                        {siteSettings.phone}
-                      </a>
+                      {siteSettings.phone ? (
+                        <a
+                          href={`tel:${siteSettings.phone}`}
+                          className="text-muted hover:text-str-gold transition-colors"
+                        >
+                          {siteSettings.phone}
+                        </a>
+                      ) : (
+                        <span className="text-muted">Contact us via the form below</span>
+                      )}
                     </div>
                   </div>
 
@@ -336,10 +340,10 @@ export default function ContactPage() {
               <div className="text-center">
                 <MapPin className="w-12 h-12 mx-auto mb-4 text-str-gold" />
                 <p className="font-display font-bold text-foreground mb-2">
-                  Google Maps Embed
+                  Visit Us
                 </p>
                 <p className="text-sm">
-                  Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to enable
+                  24 North Avenue East, Cranford, NJ 07016
                 </p>
               </div>
             </div>

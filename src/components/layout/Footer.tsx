@@ -51,12 +51,12 @@ export function Footer({ socialLinks = {} }: FooterProps) {
             <h3 className="font-display text-sm font-bold uppercase tracking-wider text-white mb-4">
               Navigation
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-1">
               {navigationLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-concrete hover:text-str-gold transition-colors text-sm"
+                    className="text-concrete hover:text-str-gold transition-colors text-sm inline-block py-2"
                   >
                     {link.label}
                   </Link>
@@ -156,13 +156,13 @@ export function Footer({ socialLinks = {} }: FooterProps) {
             <div className="flex gap-6 text-sm">
               <Link
                 href="/privacy"
-                className="text-concrete hover:text-str-gold transition-colors"
+                className="text-concrete hover:text-str-gold transition-colors py-2 inline-block"
               >
                 Privacy Policy
               </Link>
               <Link
                 href="/terms"
-                className="text-concrete hover:text-str-gold transition-colors"
+                className="text-concrete hover:text-str-gold transition-colors py-2 inline-block"
               >
                 Terms of Service
               </Link>
