@@ -13,9 +13,10 @@ interface JotformSettings {
 
 interface GetStartedFormProps {
   jotform?: JotformSettings | null;
+  ghlFormUrl?: string | null;
 }
 
-export function GetStartedForm({ jotform }: GetStartedFormProps = {}) {
+export function GetStartedForm({ jotform, ghlFormUrl }: GetStartedFormProps = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -36,7 +37,9 @@ export function GetStartedForm({ jotform }: GetStartedFormProps = {}) {
     }
   }
 
-  const useJotform = jotform?.enabled === true && !!jotform.embed_url;
+  // Priority: GHL > Jotform > Custom form
+  const useGHL = !!ghlFormUrl;
+  const useJotform = !useGHL && jotform?.enabled === true && !!jotform.embed_url;
 
   return (
     <section id="get-started" className="py-16 md:py-24 bg-str-black scroll-mt-20">
@@ -51,7 +54,17 @@ export function GetStartedForm({ jotform }: GetStartedFormProps = {}) {
             </p>
           </div>
 
-          {useJotform ? (
+          {useGHL ? (
+            /* GoHighLevel Embed */
+            <div className="bg-iron-gray rounded-md p-2 md:p-4">
+              <iframe
+                src={ghlFormUrl!}
+                style={{ width: '100%', minHeight: '600px', border: 'none' }}
+                title="Get Started Form"
+                allowFullScreen
+              />
+            </div>
+          ) : useJotform ? (
             /* Jotform Embed */
             <div className="bg-iron-gray rounded-md p-2 md:p-4">
               <iframe

@@ -60,6 +60,10 @@ interface SiteSettingsData {
     instagram?: string;
     facebook?: string;
   };
+  integrations?: {
+    ghl_contact_form_url?: string;
+    ghl_general_form_url?: string;
+  };
 }
 
 interface ContactPageClientProps {
@@ -74,6 +78,11 @@ export default function ContactPageClient({ settings }: ContactPageClientProps) 
   const address = gymInfo.address || {};
   const businessHours = settings.business_hours || [];
   const socialLinks = settings.social_links || {};
+  const integrations = settings.integrations || {};
+  
+  // Check for GHL form URL (priority: contact-specific > general fallback)
+  const ghlFormUrl = integrations.ghl_contact_form_url || integrations.ghl_general_form_url || null;
+  const useGHL = !!ghlFormUrl;
 
   const {
     register,
@@ -135,7 +144,20 @@ export default function ContactPageClient({ settings }: ContactPageClientProps) 
             >
               <Card>
                 <CardContent className="p-8">
-                  {isSubmitted ? (
+                  {useGHL ? (
+                    /* GoHighLevel Embed */
+                    <div>
+                      <h2 className="text-2xl font-display font-bold text-foreground mb-6">
+                        Send Us a Message
+                      </h2>
+                      <iframe
+                        src={ghlFormUrl!}
+                        style={{ width: '100%', minHeight: '600px', border: 'none' }}
+                        title="Contact Form"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : isSubmitted ? (
                     <div className="text-center py-8">
                       <CheckCircle className="w-16 h-16 text-str-gold mx-auto mb-4" />
                       <h3 className="text-2xl font-display font-bold text-foreground mb-2">

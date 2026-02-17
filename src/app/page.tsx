@@ -44,6 +44,15 @@ export default async function Home() {
     embed_url?: string;
   } | null;
 
+  // Fetch GHL form URL from integrations
+  const { data: integrationsSettings } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'integrations')
+    .single();
+
+  const ghlGetStartedFormUrl = (integrationsSettings?.value as any)?.ghl_get_started_form_url || null;
+
   // Fetch Google Place ID for review links
   const { data: googlePlaceIdSetting } = await supabase
     .from('site_settings')
@@ -73,7 +82,7 @@ export default async function Home() {
         <FindUs />
 
         {/* 3. Get Started - Signup Form */}
-        <GetStartedForm jotform={jotform} />
+        <GetStartedForm jotform={jotform} ghlFormUrl={ghlGetStartedFormUrl} />
 
         {/* 4. Our Offerings - Semi-Private / Group Training */}
         <OurOfferings />

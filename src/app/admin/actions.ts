@@ -764,10 +764,51 @@ export async function getSettings() {
   
   if (error) throw error
   
-  // Convert array to object for easier access
+  // Convert nested DB structure to flat structure for the admin UI
   const settings: Record<string, any> = {}
-  data?.forEach((setting: { key: string; value: unknown }) => {
-    settings[setting.key] = setting.value
+  
+  data?.forEach((setting: { key: string; value: any }) => {
+    const { key, value } = setting
+    
+    // Handle nested structures
+    if (key === 'gym_info') {
+      settings.gym_name = value?.name || ''
+      settings.tagline = value?.tagline || ''
+      settings.phone = value?.phone || ''
+      settings.email = value?.email || ''
+      settings.address_street = value?.address?.street || ''
+      settings.address_city = value?.address?.city || ''
+      settings.address_state = value?.address?.state || ''
+      settings.address_zip = value?.address?.zip || ''
+    } else if (key === 'business_hours') {
+      const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+      days.forEach(day => {
+        settings[`hours_${day}_open`] = value?.[day]?.open || ''
+        settings[`hours_${day}_close`] = value?.[day]?.close || ''
+      })
+    } else if (key === 'social_links') {
+      settings.social_facebook = value?.facebook || ''
+      settings.social_instagram = value?.instagram || ''
+      settings.social_youtube = value?.youtube || ''
+      settings.social_tiktok = value?.tiktok || ''
+    } else if (key === 'integrations') {
+      settings.trainheroic_whiteboard_url = value?.trainheroic_whiteboard_url || ''
+      settings.gohighlevel_widget_id = value?.gohighlevel_widget_id || ''
+      settings.google_analytics_id = value?.google_analytics_id || ''
+      settings.google_maps_embed_url = value?.google_maps_embed_url || ''
+      settings.ghl_get_started_form_url = value?.ghl_get_started_form_url || ''
+      settings.ghl_contact_form_url = value?.ghl_contact_form_url || ''
+      settings.ghl_general_form_url = value?.ghl_general_form_url || ''
+    } else if (key === 'jotform') {
+      settings.jotform_enabled = value?.enabled || false
+      settings.jotform_form_id = value?.form_id || ''
+      settings.jotform_embed_url = value?.embed_url || ''
+    } else if (key === 'terms_content') {
+      settings.terms_content = value || ''
+    } else {
+      // Keep other settings as-is (instagram_handle, google_place_id, etc.)
+      settings[key] = value
+    }
   })
   
   return settings
@@ -776,12 +817,100 @@ export async function getSettings() {
 export async function updateSettings(settings: Record<string, any>) {
   const supabase = await createAdminClient()
   
-  // Convert settings object to array of upsert operations
-  const updates = Object.entries(settings).map(([key, value]) => ({
-    key,
-    value,
+  // Re-group flat settings back into nested structure
+  const updates: { key: string; value: any; updated_at: string }[] = []
+  
+  // Gym Info
+  updates.push({
+    key: 'gym_info',
+    value: {
+      name: settings.gym_name || '',
+      tagline: settings.tagline || '',
+      phone: settings.phone || '',
+      email: settings.email || '',
+      address: {
+        street: settings.address_street || '',
+        city: settings.address_city || '',
+        state: settings.address_state || '',
+        zip: settings.address_zip || '',
+      }
+    },
     updated_at: new Date().toISOString(),
-  }))
+  })
+  
+  // Business Hours
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+  const businessHours: Record<string, { open: string; close: string }> = {}
+  days.forEach(day => {
+    businessHours[day] = {
+      open: settings[`hours_${day}_open`] || '',
+      close: settings[`hours_${day}_close`] || '',
+    }
+  })
+  updates.push({
+    key: 'business_hours',
+    value: businessHours,
+    updated_at: new Date().toISOString(),
+  })
+  
+  // Social Links
+  updates.push({
+    key: 'social_links',
+    value: {
+      facebook: settings.social_facebook || '',
+      instagram: settings.social_instagram || '',
+      youtube: settings.social_youtube || '',
+      tiktok: settings.social_tiktok || '',
+    },
+    updated_at: new Date().toISOString(),
+  })
+  
+  // Integrations
+  updates.push({
+    key: 'integrations',
+    value: {
+      trainheroic_whiteboard_url: settings.trainheroic_whiteboard_url || '',
+      gohighlevel_widget_id: settings.gohighlevel_widget_id || '',
+      google_analytics_id: settings.google_analytics_id || '',
+      google_maps_embed_url: settings.google_maps_embed_url || '',
+      ghl_get_started_form_url: settings.ghl_get_started_form_url || '',
+      ghl_contact_form_url: settings.ghl_contact_form_url || '',
+      ghl_general_form_url: settings.ghl_general_form_url || '',
+    },
+    updated_at: new Date().toISOString(),
+  })
+  
+  // Jotform
+  updates.push({
+    key: 'jotform',
+    value: {
+      enabled: settings.jotform_enabled === true || settings.jotform_enabled === 'true',
+      form_id: settings.jotform_form_id || '',
+      embed_url: settings.jotform_embed_url || '',
+    },
+    updated_at: new Date().toISOString(),
+  })
+  
+  // Terms Content
+  if (settings.terms_content !== undefined) {
+    updates.push({
+      key: 'terms_content',
+      value: settings.terms_content,
+      updated_at: new Date().toISOString(),
+    })
+  }
+  
+  // Other standalone settings (instagram_handle, google_place_id, etc.)
+  const standaloneKeys = ['instagram_handle', 'google_place_id', 'instagram_feed_embed', 'sync_secret_key']
+  standaloneKeys.forEach(key => {
+    if (settings[key] !== undefined) {
+      updates.push({
+        key,
+        value: settings[key],
+        updated_at: new Date().toISOString(),
+      })
+    }
+  })
   
   const { error } = await supabase
     .from('site_settings')

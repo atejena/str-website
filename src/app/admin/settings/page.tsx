@@ -290,14 +290,56 @@ export default function AdminSettingsPage() {
                 placeholder="widget_123456"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Google Analytics ID</label>
-              <Input
-                value={settings.google_analytics_id || ''}
-                onChange={(e) => updateSetting('google_analytics_id', e.target.value)}
-                placeholder="G-XXXXXXXXXX"
-              />
+            
+            <div className="border-t border-border pt-4 mt-6">
+              <h3 className="text-lg font-display font-semibold text-foreground mb-4">
+                GoHighLevel Form Embeds
+              </h3>
+              <p className="text-sm text-muted mb-4">
+                Add GHL form URLs to embed forms on your site. GHL forms take priority over Jotform and custom forms.
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Get Started Form URL (Homepage)</label>
+                  <Input
+                    type="url"
+                    value={settings.ghl_get_started_form_url || ''}
+                    onChange={(e) => updateSetting('ghl_get_started_form_url', e.target.value)}
+                    placeholder="https://api.leadconnectorhq.com/widget/form/..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Contact Form URL (Contact Page)</label>
+                  <Input
+                    type="url"
+                    value={settings.ghl_contact_form_url || ''}
+                    onChange={(e) => updateSetting('ghl_contact_form_url', e.target.value)}
+                    placeholder="https://api.leadconnectorhq.com/widget/form/..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">General Form URL (Fallback)</label>
+                  <Input
+                    type="url"
+                    value={settings.ghl_general_form_url || ''}
+                    onChange={(e) => updateSetting('ghl_general_form_url', e.target.value)}
+                    placeholder="https://api.leadconnectorhq.com/widget/form/..."
+                  />
+                </div>
+              </div>
             </div>
+            
+            <div className="border-t border-border pt-4 mt-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Google Analytics ID</label>
+                <Input
+                  value={settings.google_analytics_id || ''}
+                  onChange={(e) => updateSetting('google_analytics_id', e.target.value)}
+                  placeholder="G-XXXXXXXXXX"
+                />
+              </div>
+            </div>
+            
             <div>
               <label className="block text-sm font-medium mb-2">Google Maps Embed URL</label>
               <Textarea
@@ -431,6 +473,46 @@ export default function AdminSettingsPage() {
                 rows={3}
                 placeholder="https://form.jotform.com/..."
               />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Terms & Conditions */}
+      <Card>
+        <CardContent className="p-6">
+          <h2 className="text-xl font-display font-bold text-foreground mb-6">
+            Terms &amp; Conditions
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Terms Content (Markdown)</label>
+              <Textarea
+                value={settings.terms_content || ''}
+                onChange={(e) => updateSetting('terms_content', e.target.value)}
+                rows={20}
+                placeholder="# Terms of Service&#10;&#10;## 1. Acceptance of Terms&#10;&#10;Your terms content here..."
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted mt-2">
+                Use Markdown formatting. This content will be displayed on the /terms page.
+              </p>
+            </div>
+            
+            <div className="bg-surface border border-border rounded p-4">
+              <h3 className="text-sm font-bold mb-2">Markdown Formatting Guide:</h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs text-muted font-mono">
+                <div><span className="text-foreground"># Heading 1</span></div>
+                <div><span className="text-foreground">## Heading 2</span></div>
+                <div><span className="text-foreground">**bold text**</span></div>
+                <div><span className="text-foreground">*italic text*</span></div>
+                <div><span className="text-foreground">- list item</span></div>
+                <div><span className="text-foreground">1. numbered item</span></div>
+                <div><span className="text-foreground">[link text](url)</span></div>
+                <div><span className="text-foreground">&gt; blockquote</span></div>
+                <div><span className="text-foreground">---</span> (horizontal rule)</div>
+                <div><span className="text-foreground">`code`</span></div>
+              </div>
             </div>
           </div>
         </CardContent>

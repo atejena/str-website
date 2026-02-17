@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, Upload, Video } from 'lucide-react'
+import { Plus, Edit, Trash2, Upload, Video, X, Check } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -31,6 +31,20 @@ type GalleryImage = {
   created_at: string
 }
 
+type BulkUploadItem = {
+  id: string
+  file: File
+  preview: string
+  title: string
+  category: string
+  alt_text: string
+  featured: boolean
+  media_type: 'image' | 'video'
+  selected: boolean
+  uploaded: boolean
+  error?: string
+}
+
 export default function AdminGalleryPage() {
   const { addToast } = useToast()
   const toast = {
@@ -53,6 +67,12 @@ export default function AdminGalleryPage() {
     featured: false,
     sort_order: '0',
   })
+
+  // Bulk upload state
+  const [bulkModalOpen, setBulkModalOpen] = useState(false)
+  const [bulkItems, setBulkItems] = useState<BulkUploadItem[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 })
 
   const loadImages = async () => {
     try {
@@ -151,6 +171,128 @@ export default function AdminGalleryPage() {
     setEditingImage(null)
   }
 
+  // Bulk upload functions
+  const detectMediaType = (filename: string): 'image' | 'video' => {
+    const ext = filename.split('.').pop()?.toLowerCase()
+    const videoExts = ['mp4', 'mov', 'webm', 'avi', 'mkv']
+    return videoExts.includes(ext || '') ? 'video' : 'image'
+  }
+
+  const handleBulkFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    
+    if (files.length > 20) {
+      toast.error('Maximum 20 files allowed')
+      return
+    }
+
+    const items: BulkUploadItem[] = files.map((file, index) => {
+      const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '')
+      const mediaType = detectMediaType(file.name)
+      
+      return {
+        id: `${Date.now()}-${index}`,
+        file,
+        preview: URL.createObjectURL(file),
+        title: nameWithoutExt,
+        category: 'Facility',
+        alt_text: nameWithoutExt,
+        featured: false,
+        media_type: mediaType,
+        selected: false,
+        uploaded: false,
+      }
+    })
+
+    setBulkItems(items)
+    setBulkModalOpen(true)
+  }
+
+  const updateBulkItem = (id: string, updates: Partial<BulkUploadItem>) => {
+    setBulkItems(prev => prev.map(item => 
+      item.id === id ? { ...item, ...updates } : item
+    ))
+  }
+
+  const toggleBulkSelection = (id: string) => {
+    setBulkItems(prev => prev.map(item =>
+      item.id === id ? { ...item, selected: !item.selected } : item
+    ))
+  }
+
+  const toggleAllSelection = () => {
+    const allSelected = bulkItems.every(item => item.selected)
+    setBulkItems(prev => prev.map(item => ({ ...item, selected: !allSelected })))
+  }
+
+  const bulkSetCategory = (category: string) => {
+    setBulkItems(prev => prev.map(item =>
+      item.selected ? { ...item, category } : item
+    ))
+  }
+
+  const bulkSetFeatured = (featured: boolean) => {
+    setBulkItems(prev => prev.map(item =>
+      item.selected ? { ...item, featured } : item
+    ))
+  }
+
+  const handleBulkUpload = async () => {
+    setUploading(true)
+    setUploadProgress({ current: 0, total: bulkItems.length })
+
+    for (let i = 0; i < bulkItems.length; i++) {
+      const item = bulkItems[i]
+      
+      try {
+        const formDataObj = new FormData()
+        formDataObj.append('title', item.title)
+        formDataObj.append('description', '')
+        formDataObj.append('category', item.category)
+        formDataObj.append('alt_text', item.alt_text)
+        formDataObj.append('media_type', item.media_type)
+        formDataObj.append('video_url', '')
+        formDataObj.append('featured', item.featured.toString())
+        formDataObj.append('sort_order', '0')
+        formDataObj.append('image', item.file)
+
+        await createGalleryImage(formDataObj)
+        
+        updateBulkItem(item.id, { uploaded: true })
+        setUploadProgress({ current: i + 1, total: bulkItems.length })
+      } catch (error) {
+        updateBulkItem(item.id, { error: 'Upload failed' })
+        toast.error(`Failed to upload ${item.title}`)
+      }
+    }
+
+    setUploading(false)
+    toast.success(`Successfully uploaded ${bulkItems.filter(i => i.uploaded).length} items`)
+    
+    // Refresh gallery and close modal after a short delay
+    setTimeout(() => {
+      loadImages()
+      setBulkModalOpen(false)
+      setBulkItems([])
+      setUploadProgress({ current: 0, total: 0 })
+    }, 1500)
+  }
+
+  const closeBulkModal = () => {
+    if (uploading) {
+      if (!confirm('Upload in progress. Are you sure you want to cancel?')) {
+        return
+      }
+    }
+    
+    // Clean up preview URLs
+    bulkItems.forEach(item => URL.revokeObjectURL(item.preview))
+    
+    setBulkModalOpen(false)
+    setBulkItems([])
+    setUploadProgress({ current: 0, total: 0 })
+  }
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -159,10 +301,27 @@ export default function AdminGalleryPage() {
           <h1 className="text-3xl font-display font-bold text-foreground">Gallery</h1>
           <p className="text-muted mt-1">Manage photos and videos.</p>
         </div>
-        <Button onClick={() => { resetForm(); setModalOpen(true) }}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Image
-        </Button>
+        <div className="flex gap-3">
+          <label>
+            <input
+              type="file"
+              multiple
+              accept="image/*,video/*"
+              onChange={handleBulkFileSelect}
+              className="hidden"
+            />
+            <Button variant="outline" asChild>
+              <span className="cursor-pointer">
+                <Upload className="mr-2 h-4 w-4" />
+                Bulk Upload
+              </span>
+            </Button>
+          </label>
+          <Button onClick={() => { resetForm(); setModalOpen(true) }}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Image
+          </Button>
+        </div>
       </div>
 
       {/* Gallery Grid */}
@@ -259,6 +418,7 @@ export default function AdminGalleryPage() {
                 <option value="Classes">Classes</option>
                 <option value="Events">Events</option>
                 <option value="Transformations">Transformations</option>
+                <option value="Training">Training</option>
               </Select>
             </div>
             <div>
@@ -354,6 +514,211 @@ export default function AdminGalleryPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Bulk Upload Modal */}
+      {bulkModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg w-full max-w-6xl max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-border">
+              <div>
+                <h2 className="text-2xl font-display font-bold text-foreground">Bulk Upload</h2>
+                <p className="text-sm text-muted mt-1">
+                  {bulkItems.length} {bulkItems.length === 1 ? 'item' : 'items'} selected
+                  {uploadProgress.total > 0 && ` • Uploading ${uploadProgress.current} of ${uploadProgress.total}`}
+                </p>
+              </div>
+              <button
+                onClick={closeBulkModal}
+                disabled={uploading}
+                className="p-2 text-muted hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Bulk Actions Bar */}
+            {bulkItems.some(item => item.selected) && (
+              <div className="p-4 bg-surface border-b border-border">
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium">
+                    {bulkItems.filter(i => i.selected).length} selected
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm">Category:</label>
+                    <Select
+                      onChange={(e) => bulkSetCategory(e.target.value)}
+                      className="text-sm"
+                    >
+                      <option value="">Set for all...</option>
+                      <option value="Facility">Facility</option>
+                      <option value="Classes">Classes</option>
+                      <option value="Events">Events</option>
+                      <option value="Transformations">Transformations</option>
+                      <option value="Training">Training</option>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => bulkSetFeatured(true)}
+                    >
+                      Set Featured
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => bulkSetFeatured(false)}
+                    >
+                      Unset Featured
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Items Grid */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-4">
+                {/* Select All */}
+                <div className="flex items-center gap-2 pb-2 border-b border-border">
+                  <input
+                    type="checkbox"
+                    checked={bulkItems.length > 0 && bulkItems.every(i => i.selected)}
+                    onChange={toggleAllSelection}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm font-medium">Select All</span>
+                </div>
+
+                {/* Items */}
+                {bulkItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`border rounded-lg p-4 ${
+                      item.selected ? 'border-str-gold bg-str-gold/5' : 'border-border'
+                    } ${item.uploaded ? 'opacity-60' : ''}`}
+                  >
+                    <div className="flex gap-4">
+                      {/* Checkbox & Thumbnail */}
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={item.selected}
+                          onChange={() => toggleBulkSelection(item.id)}
+                          disabled={item.uploaded}
+                          className="w-4 h-4 mt-1"
+                        />
+                        <div className="w-24 h-24 bg-surface rounded overflow-hidden flex-shrink-0">
+                          {item.media_type === 'video' ? (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Video className="w-8 h-8 text-muted" />
+                            </div>
+                          ) : (
+                            <img
+                              src={item.preview}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Metadata Fields */}
+                      <div className="flex-1 grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium mb-1">Title</label>
+                          <Input
+                            value={item.title}
+                            onChange={(e) => updateBulkItem(item.id, { title: e.target.value })}
+                            disabled={item.uploaded}
+                            className="text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium mb-1">Category</label>
+                          <Select
+                            value={item.category}
+                            onChange={(e) => updateBulkItem(item.id, { category: e.target.value })}
+                            disabled={item.uploaded}
+                            className="text-sm"
+                          >
+                            <option value="Facility">Facility</option>
+                            <option value="Classes">Classes</option>
+                            <option value="Events">Events</option>
+                            <option value="Transformations">Transformations</option>
+                            <option value="Training">Training</option>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium mb-1">Alt Text</label>
+                          <Input
+                            value={item.alt_text}
+                            onChange={(e) => updateBulkItem(item.id, { alt_text: e.target.value })}
+                            disabled={item.uploaded}
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={item.featured}
+                              onChange={(e) => updateBulkItem(item.id, { featured: e.target.checked })}
+                              disabled={item.uploaded}
+                              className="w-4 h-4"
+                            />
+                            <span className="text-xs">Featured</span>
+                          </label>
+                          <Badge variant={item.media_type === 'video' ? 'secondary' : 'outline'} size="sm">
+                            {item.media_type}
+                          </Badge>
+                          {item.uploaded && (
+                            <Badge variant="primary" size="sm">
+                              <Check className="w-3 h-3 mr-1" />
+                              Uploaded
+                            </Badge>
+                          )}
+                          {item.error && (
+                            <Badge variant="error" size="sm">
+                              Error
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t border-border">
+              <div className="flex justify-between items-center">
+                <p className="text-sm text-muted">
+                  {uploading ? 'Upload in progress...' : 'Review and upload all items'}
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={closeBulkModal}
+                    disabled={uploading}
+                  >
+                    {uploading ? 'Close' : 'Cancel'}
+                  </Button>
+                  <Button
+                    onClick={handleBulkUpload}
+                    disabled={uploading || bulkItems.length === 0}
+                  >
+                    {uploading ? `Uploading... (${uploadProgress.current}/${uploadProgress.total})` : `Upload All (${bulkItems.length})`}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
