@@ -5,7 +5,17 @@ import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/layout/Container';
 import { submitContactForm } from '@/app/actions/contact';
 
-export function GetStartedForm() {
+interface JotformSettings {
+  enabled?: boolean;
+  form_id?: string;
+  embed_url?: string;
+}
+
+interface GetStartedFormProps {
+  jotform?: JotformSettings | null;
+}
+
+export function GetStartedForm({ jotform }: GetStartedFormProps = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -26,6 +36,8 @@ export function GetStartedForm() {
     }
   }
 
+  const useJotform = jotform?.enabled === true && !!jotform.embed_url;
+
   return (
     <section id="get-started" className="py-16 md:py-24 bg-str-black scroll-mt-20">
       <Container>
@@ -39,98 +51,111 @@ export function GetStartedForm() {
             </p>
           </div>
 
-          <div className="bg-iron-gray rounded-md p-6 md:p-8">
-            <form id="get-started-form" action={handleSubmit} className="space-y-6">
-              {/* Name */}
-              <div>
-                <label htmlFor="name" className="block text-white font-medium mb-2">
-                  Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  required
-                  className="w-full px-4 py-3 bg-str-black border border-concrete/20 rounded-sm text-white placeholder-concrete/50 focus:outline-none focus:border-str-gold focus:ring-2 focus:ring-str-gold/20 transition-colors"
-                  placeholder="Your full name"
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-white font-medium mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  className="w-full px-4 py-3 bg-str-black border border-concrete/20 rounded-sm text-white placeholder-concrete/50 focus:outline-none focus:border-str-gold focus:ring-2 focus:ring-str-gold/20 transition-colors"
-                  placeholder="your@email.com"
-                />
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label htmlFor="phone" className="block text-white font-medium mb-2">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  className="w-full px-4 py-3 bg-str-black border border-concrete/20 rounded-sm text-white placeholder-concrete/50 focus:outline-none focus:border-str-gold focus:ring-2 focus:ring-str-gold/20 transition-colors"
-                  placeholder="(123) 456-7890"
-                />
-              </div>
-
-              {/* Goals */}
-              <div>
-                <label htmlFor="goals" className="block text-white font-medium mb-2">
-                  What are your fitness goals? *
-                </label>
-                <textarea
-                  id="goals"
-                  name="message"
-                  required
-                  rows={4}
-                  className="w-full px-4 py-3 bg-str-black border border-concrete/20 rounded-sm text-white placeholder-concrete/50 focus:outline-none focus:border-str-gold focus:ring-2 focus:ring-str-gold/20 transition-colors resize-none"
-                  placeholder="Tell us what you're looking to achieve..."
-                />
-              </div>
-
-              <input type="hidden" name="subject" value="New Get Started Inquiry" />
-              <input type="hidden" name="source_page" value="home" />
-
-              {/* Message Display */}
-              {message && (
-                <div
-                  className={`p-4 rounded-sm ${
-                    message.type === 'success'
-                      ? 'bg-success/20 border border-success text-success'
-                      : 'bg-error/20 border border-error text-error'
-                  }`}
-                >
-                  {message.text}
+          {useJotform ? (
+            /* Jotform Embed */
+            <div className="bg-iron-gray rounded-md p-2 md:p-4">
+              <iframe
+                src={jotform!.embed_url}
+                style={{ width: '100%', minHeight: '500px', border: 'none' }}
+                title="Get Started Form"
+                allowFullScreen
+              />
+            </div>
+          ) : (
+            /* Custom Form */
+            <div className="bg-iron-gray rounded-md p-6 md:p-8">
+              <form id="get-started-form" action={handleSubmit} className="space-y-6">
+                {/* Name */}
+                <div>
+                  <label htmlFor="name" className="block text-white font-medium mb-2">
+                    Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    className="w-full px-4 py-3 bg-str-black border border-concrete/20 rounded-sm text-white placeholder-concrete/50 focus:outline-none focus:border-str-gold focus:ring-2 focus:ring-str-gold/20 transition-colors"
+                    placeholder="Your full name"
+                  />
                 </div>
-              )}
 
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                size="lg"
-                disabled={isSubmitting}
-                className="w-full"
-              >
-                {isSubmitting ? 'Sending...' : 'Submit'}
-              </Button>
+                {/* Email */}
+                <div>
+                  <label htmlFor="email" className="block text-white font-medium mb-2">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    className="w-full px-4 py-3 bg-str-black border border-concrete/20 rounded-sm text-white placeholder-concrete/50 focus:outline-none focus:border-str-gold focus:ring-2 focus:ring-str-gold/20 transition-colors"
+                    placeholder="your@email.com"
+                  />
+                </div>
 
-              <p className="text-center text-sm text-concrete">
-                We'll get back to you within 24 hours
-              </p>
-            </form>
-          </div>
+                {/* Phone */}
+                <div>
+                  <label htmlFor="phone" className="block text-white font-medium mb-2">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    className="w-full px-4 py-3 bg-str-black border border-concrete/20 rounded-sm text-white placeholder-concrete/50 focus:outline-none focus:border-str-gold focus:ring-2 focus:ring-str-gold/20 transition-colors"
+                    placeholder="(123) 456-7890"
+                  />
+                </div>
+
+                {/* Goals */}
+                <div>
+                  <label htmlFor="goals" className="block text-white font-medium mb-2">
+                    What are your fitness goals? *
+                  </label>
+                  <textarea
+                    id="goals"
+                    name="message"
+                    required
+                    rows={4}
+                    className="w-full px-4 py-3 bg-str-black border border-concrete/20 rounded-sm text-white placeholder-concrete/50 focus:outline-none focus:border-str-gold focus:ring-2 focus:ring-str-gold/20 transition-colors resize-none"
+                    placeholder="Tell us what you're looking to achieve..."
+                  />
+                </div>
+
+                <input type="hidden" name="subject" value="New Get Started Inquiry" />
+                <input type="hidden" name="source_page" value="home" />
+
+                {/* Message Display */}
+                {message && (
+                  <div
+                    className={`p-4 rounded-sm ${
+                      message.type === 'success'
+                        ? 'bg-success/20 border border-success text-success'
+                        : 'bg-error/20 border border-error text-error'
+                    }`}
+                  >
+                    {message.text}
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={isSubmitting}
+                  className="w-full"
+                >
+                  {isSubmitting ? 'Sending...' : 'Submit'}
+                </Button>
+
+                <p className="text-center text-sm text-concrete">
+                  We&apos;ll get back to you within 24 hours
+                </p>
+              </form>
+            </div>
+          )}
         </div>
       </Container>
     </section>

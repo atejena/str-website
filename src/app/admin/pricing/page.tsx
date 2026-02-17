@@ -1,24 +1,34 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, DollarSign } from 'lucide-react'
+import { Plus, Edit, Trash2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { AdminModal as Modal } from '@/components/admin'
 import { Input } from '@/components/ui/Input'
-import { AdminSelect as Select } from '@/components/admin'
 import { useToast } from '@/components/ui/Toast'
 import { getPricingPlans, createPricingPlan, updatePricingPlan, deletePricingPlan } from '../actions'
+
+type Feature = {
+  name: string
+  included: boolean
+  note?: string
+}
 
 type PricingPlan = {
   id: string
   name: string
-  price: number
-  billing_period: string
-  features: string[]
-  is_popular: boolean
+  slug: string
+  description: string
+  price_monthly: number
+  price_annual: number | null
+  setup_fee: number
+  features: Feature[]
+  highlighted: boolean
+  cta_text: string
   active: boolean
+  sort_order: number
 }
 
 export default function AdminPricingPage() {
@@ -34,18 +44,22 @@ export default function AdminPricingPage() {
   const [editingPlan, setEditingPlan] = useState<PricingPlan | null>(null)
   const [formData, setFormData] = useState({
     name: '',
-    price: '',
-    billing_period: 'monthly',
+    description: '',
+    price_monthly: '',
+    price_annual: '',
+    setup_fee: '0',
     features: '',
-    is_popular: false,
+    highlighted: false,
+    cta_text: 'Get Started',
     active: true,
+    sort_order: '0',
   })
 
   const loadPlans = async () => {
     try {
       const data = await getPricingPlans()
-      setPlans(data)
-    } catch (error) {
+      setPlans(data as PricingPlan[])
+    } catch {
       toast.error('Failed to load pricing plans')
     } finally {
       setLoading(false)
@@ -54,6 +68,7 @@ export default function AdminPricingPage() {
 
   useEffect(() => {
     loadPlans()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,11 +78,15 @@ export default function AdminPricingPage() {
     try {
       const formDataObj = new FormData()
       formDataObj.append('name', formData.name)
-      formDataObj.append('price', formData.price)
-      formDataObj.append('billing_period', formData.billing_period)
-      formDataObj.append('features', JSON.stringify(formData.features.split('\n').filter(f => f.trim())))
-      formDataObj.append('is_popular', formData.is_popular.toString())
+      formDataObj.append('description', formData.description)
+      formDataObj.append('price_monthly', formData.price_monthly)
+      formDataObj.append('price_annual', formData.price_annual)
+      formDataObj.append('setup_fee', formData.setup_fee)
+      formDataObj.append('features', formData.features)
+      formDataObj.append('highlighted', formData.highlighted.toString())
+      formDataObj.append('cta_text', formData.cta_text)
       formDataObj.append('active', formData.active.toString())
+      formDataObj.append('sort_order', formData.sort_order)
 
       if (editingPlan) {
         await updatePricingPlan(editingPlan.id, formDataObj)
@@ -80,7 +99,7 @@ export default function AdminPricingPage() {
       setModalOpen(false)
       resetForm()
       loadPlans()
-    } catch (error) {
+    } catch {
       toast.error('Failed to save pricing plan')
     } finally {
       setLoading(false)
@@ -89,13 +108,24 @@ export default function AdminPricingPage() {
 
   const handleEdit = (plan: PricingPlan) => {
     setEditingPlan(plan)
+    const featuresText = (plan.features || [])
+      .map(f => {
+        if (typeof f === 'string') return f
+        return f.included ? f.name : `[excluded] ${f.name}`
+      })
+      .join('\n')
+
     setFormData({
       name: plan.name,
-      price: plan.price.toString(),
-      billing_period: plan.billing_period,
-      features: plan.features.join('\n'),
-      is_popular: plan.is_popular,
+      description: plan.description || '',
+      price_monthly: plan.price_monthly?.toString() || '0',
+      price_annual: plan.price_annual?.toString() || '',
+      setup_fee: plan.setup_fee?.toString() || '0',
+      features: featuresText,
+      highlighted: plan.highlighted || false,
+      cta_text: plan.cta_text || 'Get Started',
       active: plan.active,
+      sort_order: plan.sort_order?.toString() || '0',
     })
     setModalOpen(true)
   }
@@ -107,7 +137,7 @@ export default function AdminPricingPage() {
       await deletePricingPlan(id)
       toast.success('Pricing plan deleted')
       loadPlans()
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete pricing plan')
     }
   }
@@ -115,13 +145,22 @@ export default function AdminPricingPage() {
   const resetForm = () => {
     setFormData({
       name: '',
-      price: '',
-      billing_period: 'monthly',
+      description: '',
+      price_monthly: '',
+      price_annual: '',
+      setup_fee: '0',
       features: '',
-      is_popular: false,
+      highlighted: false,
+      cta_text: 'Get Started',
       active: true,
+      sort_order: '0',
     })
     setEditingPlan(null)
+  }
+
+  const getIncludedFeatures = (features: Feature[]) => {
+    if (!features || !Array.isArray(features)) return []
+    return features.filter(f => typeof f === 'object' ? f.included : true)
   }
 
   return (
@@ -138,51 +177,78 @@ export default function AdminPricingPage() {
         </Button>
       </div>
 
+      {loading && plans.length === 0 && (
+        <p className="text-muted">Loading plans...</p>
+      )}
+
+      {!loading && plans.length === 0 && (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <p className="text-muted mb-4">No pricing plans yet.</p>
+            <Button onClick={() => { resetForm(); setModalOpen(true) }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Your First Plan
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Plans Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {plans.map((plan) => (
-          <Card key={plan.id} className={plan.is_popular ? 'border-str-gold' : ''}>
+          <Card key={plan.id} className={plan.highlighted ? 'border-str-gold' : ''}>
             <CardContent className="p-6">
-              {plan.is_popular && (
+              {plan.highlighted && (
                 <Badge variant="primary" size="sm" className="mb-3">
                   Most Popular
                 </Badge>
               )}
               <div className="mb-4">
-                <h3 className="text-xl font-display font-bold text-foreground mb-2">
+                <h3 className="text-xl font-display font-bold text-foreground mb-1">
                   {plan.name}
                 </h3>
+                {plan.description && (
+                  <p className="text-sm text-muted mb-3">{plan.description}</p>
+                )}
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold text-str-gold">
-                    ${plan.price}
+                    ${plan.price_monthly}
                   </span>
-                  <span className="text-muted">/{plan.billing_period}</span>
+                  <span className="text-muted">/month</span>
                 </div>
+                {plan.price_annual != null && plan.price_annual > 0 && (
+                  <p className="text-sm text-muted mt-1">
+                    or ${plan.price_annual}/year
+                  </p>
+                )}
               </div>
               
               <ul className="space-y-2 mb-6">
-                {plan.features.map((feature, idx) => (
+                {getIncludedFeatures(plan.features).map((feature, idx) => (
                   <li key={idx} className="text-sm text-muted flex items-start">
                     <span className="text-str-gold mr-2">✓</span>
-                    {feature}
+                    {typeof feature === 'string' ? feature : feature.name}
                   </li>
                 ))}
               </ul>
 
               <div className="flex items-center justify-between pt-4 border-t border-border">
-                <Badge variant={plan.active ? 'primary' : 'secondary'} size="sm">
-                  {plan.active ? 'Active' : 'Inactive'}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={plan.active ? 'primary' : 'secondary'} size="sm">
+                    {plan.active ? 'Active' : 'Inactive'}
+                  </Badge>
+                  <span className="text-xs text-muted">Order: {plan.sort_order}</span>
+                </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(plan)}
-                    className="p-2 text-muted hover:text-str-gold transition-colors"
+                    className="p-2 text-muted hover:text-str-gold transition-colors cursor-pointer"
                   >
                     <Edit className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(plan.id)}
-                    className="p-2 text-muted hover:text-red-500 transition-colors"
+                    className="p-2 text-muted hover:text-red-500 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -201,62 +267,104 @@ export default function AdminPricingPage() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Plan Name</label>
+            <label className="block text-sm font-medium mb-2">Plan Name *</label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g. Premium"
               required
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Description</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-4 py-2 border border-border rounded-[2px] bg-background text-foreground"
+              rows={2}
+              placeholder="Short description of this plan"
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Price</label>
+              <label className="block text-sm font-medium mb-2">Monthly Price *</label>
               <Input
                 type="number"
                 step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                value={formData.price_monthly}
+                onChange={(e) => setFormData({ ...formData, price_monthly: e.target.value })}
+                placeholder="99"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Billing Period</label>
-              <Select
-                value={formData.billing_period}
-                onChange={(e) => setFormData({ ...formData, billing_period: e.target.value })}
-              >
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-                <option value="weekly">Weekly</option>
-              </Select>
+              <label className="block text-sm font-medium mb-2">Annual Price</label>
+              <Input
+                type="number"
+                step="0.01"
+                value={formData.price_annual}
+                onChange={(e) => setFormData({ ...formData, price_annual: e.target.value })}
+                placeholder="950"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Setup Fee</label>
+              <Input
+                type="number"
+                step="0.01"
+                value={formData.setup_fee}
+                onChange={(e) => setFormData({ ...formData, setup_fee: e.target.value })}
+                placeholder="0"
+              />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">
-              Features (one per line)
+              Features (one per line, prefix with [excluded] for non-included)
             </label>
             <textarea
               value={formData.features}
               onChange={(e) => setFormData({ ...formData, features: e.target.value })}
               className="w-full px-4 py-2 border border-border rounded-[2px] bg-background text-foreground"
               rows={6}
-              required
+              placeholder={"Unlimited gym access\nAccess to all equipment\nLocker room access\n[excluded] Personal training"}
             />
           </div>
 
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">CTA Button Text</label>
+              <Input
+                value={formData.cta_text}
+                onChange={(e) => setFormData({ ...formData, cta_text: e.target.value })}
+                placeholder="Get Started"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Sort Order</label>
+              <Input
+                type="number"
+                value={formData.sort_order}
+                onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                checked={formData.is_popular}
-                onChange={(e) => setFormData({ ...formData, is_popular: e.target.checked })}
+                checked={formData.highlighted}
+                onChange={(e) => setFormData({ ...formData, highlighted: e.target.checked })}
                 className="w-4 h-4"
               />
-              <span className="text-sm">Mark as Popular</span>
+              <span className="text-sm">Highlight as Popular</span>
             </label>
-            <label className="flex items-center gap-2">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.active}
@@ -267,7 +375,7 @@ export default function AdminPricingPage() {
             </label>
           </div>
 
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 pt-2">
             <Button
               type="button"
               variant="outline"
@@ -276,7 +384,7 @@ export default function AdminPricingPage() {
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : editingPlan ? 'Update' : 'Create'}
+              {loading ? 'Saving...' : editingPlan ? 'Update Plan' : 'Create Plan'}
             </Button>
           </div>
         </form>

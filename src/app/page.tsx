@@ -31,6 +31,19 @@ export default async function Home() {
 
   const socialLinks = settings?.value || {};
 
+  // Fetch jotform settings
+  const { data: jotformSettings } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'jotform')
+    .single();
+
+  const jotform = jotformSettings?.value as {
+    enabled?: boolean;
+    form_id?: string;
+    embed_url?: string;
+  } | null;
+
   return (
     <>
       <Header />
@@ -42,7 +55,7 @@ export default async function Home() {
         <FindUs />
 
         {/* 3. Get Started - Signup Form */}
-        <GetStartedForm />
+        <GetStartedForm jotform={jotform} />
 
         {/* 4. Our Offerings - Semi-Private / Group Training */}
         <OurOfferings />

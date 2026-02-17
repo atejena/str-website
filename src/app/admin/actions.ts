@@ -3,6 +3,22 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+function parsePlanFeatures(raw: string): { name: string; included: boolean; note?: string }[] {
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed
+  } catch {
+    // Not JSON — parse as text lines
+  }
+  return raw.split('\n').filter(f => f.trim()).map(line => {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('[excluded]')) {
+      return { name: trimmed.replace('[excluded]', '').trim(), included: false }
+    }
+    return { name: trimmed, included: true }
+  })
+}
+
 // ==================== CLASSES ====================
 
 export async function getClasses() {
@@ -208,7 +224,7 @@ export async function getPricingPlans() {
   const { data, error } = await supabase
     .from('membership_plans')
     .select('*')
-    .order('price')
+    .order('sort_order')
   
   if (error) throw error
   return data
@@ -217,13 +233,20 @@ export async function getPricingPlans() {
 export async function createPricingPlan(formData: FormData) {
   const supabase = await createAdminClient()
   
+  const features = parsePlanFeatures(formData.get('features') as string || '[]')
+
   const planData = {
     name: formData.get('name') as string,
-    price: parseFloat(formData.get('price') as string),
-    billing_period: formData.get('billing_period') as string,
-    features: JSON.parse(formData.get('features') as string || '[]'),
-    is_popular: formData.get('is_popular') === 'true',
+    slug: (formData.get('name') as string).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+    description: formData.get('description') as string || '',
+    price_monthly: parseFloat(formData.get('price_monthly') as string) || 0,
+    price_annual: parseFloat(formData.get('price_annual') as string) || null,
+    setup_fee: parseFloat(formData.get('setup_fee') as string) || 0,
+    features,
+    highlighted: formData.get('highlighted') === 'true',
+    cta_text: formData.get('cta_text') as string || 'Get Started',
     active: formData.get('active') === 'true',
+    sort_order: parseInt(formData.get('sort_order') as string) || 0,
   }
   
   const { error } = await supabase.from('membership_plans').insert(planData)
@@ -236,13 +259,20 @@ export async function createPricingPlan(formData: FormData) {
 export async function updatePricingPlan(id: string, formData: FormData) {
   const supabase = await createAdminClient()
   
+  const features = parsePlanFeatures(formData.get('features') as string || '[]')
+
   const planData = {
     name: formData.get('name') as string,
-    price: parseFloat(formData.get('price') as string),
-    billing_period: formData.get('billing_period') as string,
-    features: JSON.parse(formData.get('features') as string || '[]'),
-    is_popular: formData.get('is_popular') === 'true',
+    slug: (formData.get('name') as string).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+    description: formData.get('description') as string || '',
+    price_monthly: parseFloat(formData.get('price_monthly') as string) || 0,
+    price_annual: parseFloat(formData.get('price_annual') as string) || null,
+    setup_fee: parseFloat(formData.get('setup_fee') as string) || 0,
+    features,
+    highlighted: formData.get('highlighted') === 'true',
+    cta_text: formData.get('cta_text') as string || 'Get Started',
     active: formData.get('active') === 'true',
+    sort_order: parseInt(formData.get('sort_order') as string) || 0,
     updated_at: new Date().toISOString(),
   }
   

@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Oswald, Inter } from 'next/font/google';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/Toast';
+import GoHighLevelWidget from '@/components/GoHighLevelWidget';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 const oswald = Oswald({
   variable: '--font-oswald',
@@ -144,11 +146,22 @@ const jsonLd = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Fetch GoHighLevel widget ID from site_settings
+  const supabase = await createServerSupabaseClient();
+  const { data: integrationSettings } = await supabase
+    .from('site_settings')
+    .select('key, value')
+    .eq('key', 'integrations')
+    .single();
+
+  const ghlWidgetId =
+    (integrationSettings?.value as Record<string, string> | null)?.gohighlevel_widget_id || '';
+
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
@@ -166,6 +179,7 @@ export default function RootLayout({
           </a>
           {children}
         </ToastProvider>
+        {ghlWidgetId && <GoHighLevelWidget widgetId={ghlWidgetId} />}
       </body>
     </html>
   );
