@@ -805,6 +805,8 @@ export async function getSettings() {
       settings.jotform_embed_url = value?.embed_url || ''
     } else if (key === 'terms_content') {
       settings.terms_content = value || ''
+    } else if (key === 'privacy_content') {
+      settings.privacy_content = value || ''
     } else {
       // Keep other settings as-is (instagram_handle, google_place_id, etc.)
       settings[key] = value
@@ -896,6 +898,15 @@ export async function updateSettings(settings: Record<string, any>) {
     updates.push({
       key: 'terms_content',
       value: settings.terms_content,
+      updated_at: new Date().toISOString(),
+    })
+  }
+  
+  // Privacy Content
+  if (settings.privacy_content !== undefined) {
+    updates.push({
+      key: 'privacy_content',
+      value: settings.privacy_content,
       updated_at: new Date().toISOString(),
     })
   }

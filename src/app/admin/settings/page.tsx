@@ -518,6 +518,30 @@ export default function AdminSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Privacy Policy */}
+      <Card>
+        <CardContent className="p-6">
+          <h2 className="text-xl font-display font-bold text-foreground mb-6">
+            Privacy Policy
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Privacy Policy Content (Markdown)</label>
+              <Textarea
+                value={settings.privacy_content || ''}
+                onChange={(e) => updateSetting('privacy_content', e.target.value)}
+                rows={20}
+                placeholder="# Privacy Policy&#10;&#10;## 1. Information We Collect&#10;&#10;Your privacy policy content here..."
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted mt-2">
+                Use Markdown formatting. This content will be displayed on the /privacy page.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Save Button (Bottom) */}
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving} size="lg">
