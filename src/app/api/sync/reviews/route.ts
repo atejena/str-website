@@ -53,16 +53,21 @@ export async function GET(request: NextRequest) {
 
     const supabase = createApiAdminClient()
 
-    // Try to get place ID from site_settings, fall back to default
+    // Try to get place ID from site_settings (stored in integrations key), fall back to default
     let placeId = DEFAULT_PLACE_ID
-    const { data: placeSetting } = await supabase
-      .from('site_settings')
-      .select('value')
-      .eq('key', 'google_place_id')
-      .single()
+    try {
+      const { data: integrationsSetting } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'integrations')
+        .single()
 
-    if (placeSetting?.value && typeof placeSetting.value === 'string' && placeSetting.value.trim()) {
-      placeId = placeSetting.value.trim()
+      const integrationsValue = integrationsSetting?.value as Record<string, string> | null
+      if (integrationsValue?.google_place_id?.trim()) {
+        placeId = integrationsValue.google_place_id.trim()
+      }
+    } catch {
+      // Use default place ID
     }
 
     // Fetch reviews from Google Places API
