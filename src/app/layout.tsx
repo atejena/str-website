@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Oswald, Inter } from 'next/font/google';
 import './globals.css';
+import { ToastProvider } from '@/components/ui/Toast';
 
 const oswald = Oswald({
   variable: '--font-oswald',
@@ -159,10 +160,12 @@ export default function RootLayout({
       <body
         className={`${oswald.variable} ${inter.variable} min-h-screen bg-background text-foreground antialiased`}
       >
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
-        {children}
+        <ToastProvider>
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

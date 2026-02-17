@@ -1,25 +1,69 @@
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import {
-  Hero,
-  ValueProposition,
-  ClassesPreview,
-  TestimonialsCarousel,
-  CTABanner,
+  HeroHome,
+  FindUs,
+  GetStartedForm,
+  OurOfferings,
+  MiniBanner,
+  GoogleMaps,
+  TestimonialsScrolling,
+  GalleryPreview,
 } from '@/components/sections';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createServerSupabaseClient();
+
+  // Fetch approved testimonials for scrolling carousel
+  const { data: testimonials } = await supabase
+    .from('testimonials')
+    .select('id, member_name, rating, quote, source')
+    .eq('approved', true)
+    .order('created_at', { ascending: false });
+
+  // Fetch social links for footer
+  const { data: settings } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'social_links')
+    .single();
+
+  const socialLinks = settings?.value || {};
+
   return (
     <>
       <Header />
       <main id="main-content">
-        <Hero />
-        <ValueProposition />
-        <ClassesPreview />
-        <TestimonialsCarousel />
-        <CTABanner />
+        {/* 1. Hero - Logo + Slogan */}
+        <HeroHome />
+
+        {/* 2. Find Us - Contact Information */}
+        <FindUs />
+
+        {/* 3. Get Started - Signup Form */}
+        <GetStartedForm />
+
+        {/* 4. Our Offerings - Semi-Private / Group Training */}
+        <OurOfferings />
+
+        {/* 5. Mini Banner - Contact Info + Location */}
+        <MiniBanner />
+
+        {/* 6. Google Maps Embed */}
+        <GoogleMaps />
+
+        {/* 7. Scrolling Reviews */}
+        {testimonials && testimonials.length > 0 && (
+          <TestimonialsScrolling testimonials={testimonials} />
+        )}
+
+        {/* 8. Photos & Videos Gallery Preview */}
+        <GalleryPreview />
       </main>
-      <Footer />
+
+      {/* 9. Footer */}
+      <Footer socialLinks={socialLinks} />
     </>
   );
 }

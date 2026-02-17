@@ -25,10 +25,12 @@ const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/classes', label: 'Classes', icon: Dumbbell },
   { href: '/admin/trainers', label: 'Trainers', icon: Users },
+  { href: '/admin/pricing', label: 'Pricing', icon: FileText },
   { href: '/admin/blog', label: 'Blog', icon: FileText },
   { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
   { href: '/admin/gallery', label: 'Gallery', icon: Image },
   { href: '/admin/faqs', label: 'FAQs', icon: HelpCircle },
+  { href: '/admin/careers', label: 'Careers', icon: Users },
   { href: '/admin/leads', label: 'Leads', icon: Mail },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
