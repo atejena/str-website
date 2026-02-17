@@ -104,7 +104,7 @@ export default function PricingPageClient({ plans, faqs }: PricingPageClientProp
                         </span>
                         <span className="text-muted">/month</span>
                       </div>
-                      {plan.setupFee && plan.setupFee > 0 && (
+                      {plan.setupFee != null && plan.setupFee > 0 && (
                         <p className="text-sm text-muted mt-2">
                           + ${plan.setupFee} one-time setup fee
                         </p>
