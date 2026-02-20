@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Instagram, Facebook, Youtube } from 'lucide-react';
+import { Instagram, Facebook, Youtube, Send, CheckCircle } from 'lucide-react';
 import type { SocialLinks } from './MaintenanceGuard';
 
 interface UnderConstructionProps {
@@ -28,9 +29,47 @@ export default function UnderConstruction({
   socialLinks,
 }: UnderConstructionProps) {
   const hasSocials = socialLinks && Object.values(socialLinks).some(v => !!v);
+  const [formState, setFormState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  async function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setFormState('submitting');
+    setErrorMsg('');
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.get('name'),
+          email: formData.get('email'),
+          phone: formData.get('phone'),
+          message: formData.get('message'),
+          sms_consent: formData.get('sms_consent') === 'on',
+          subject: 'Coming Soon Page Inquiry',
+          source_page: 'coming-soon',
+        }),
+      });
+
+      if (res.ok) {
+        setFormState('success');
+        form.reset();
+      } else {
+        setFormState('error');
+        setErrorMsg('Something went wrong. Please try again.');
+      }
+    } catch {
+      setFormState('error');
+      setErrorMsg('Unable to send. Please email spencer@trainwithstr.com directly.');
+    }
+  }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col bg-[#0a0a0f] overflow-hidden">
+    <div className="fixed inset-0 z-[9999] flex flex-col bg-[#0a0a0f] overflow-y-auto">
       {/* Animated gradient background */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute inset-0 animate-gradient-shift bg-[length:400%_400%] bg-gradient-to-br from-[#15151d] via-[#1a1a2e] to-[#0f0f1a]" />
@@ -77,6 +116,88 @@ export default function UnderConstruction({
 
           {/* Decorative line */}
           <div className="w-20 h-0.5 bg-str-gold mx-auto mb-10" />
+
+          {/* Contact Form */}
+          <div className="max-w-md mx-auto mb-10">
+            {formState === 'success' ? (
+              <div className="text-center py-6">
+                <CheckCircle className="w-12 h-12 text-str-gold mx-auto mb-3" />
+                <p className="text-white font-display font-bold text-lg mb-1">Message Sent!</p>
+                <p className="text-gray-400 text-sm">We&apos;ll be in touch soon.</p>
+                <button
+                  onClick={() => setFormState('idle')}
+                  className="mt-4 text-str-gold text-sm underline hover:text-str-gold/80 cursor-pointer"
+                >
+                  Send another message
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleFormSubmit} className="space-y-4 text-left">
+                <p className="text-center text-gray-400 text-sm mb-4">
+                  Interested? Drop us a message and we&apos;ll keep you posted.
+                </p>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    placeholder="Name *"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded text-white placeholder-gray-500 text-sm focus:outline-none focus:border-str-gold/50 transition-colors"
+                  />
+                  <input
+                    type="tel"
+                    name="phone"
+                    placeholder="Phone"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded text-white placeholder-gray-500 text-sm focus:outline-none focus:border-str-gold/50 transition-colors"
+                  />
+                </div>
+
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="Email *"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded text-white placeholder-gray-500 text-sm focus:outline-none focus:border-str-gold/50 transition-colors"
+                />
+
+                <textarea
+                  name="message"
+                  rows={3}
+                  placeholder="Tell us about your fitness goals..."
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded text-white placeholder-gray-500 text-sm focus:outline-none focus:border-str-gold/50 transition-colors resize-none"
+                />
+
+                {/* SMS Consent Checkbox — A2P Compliant */}
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="sms_consent_cs"
+                    name="sms_consent"
+                    className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent cursor-pointer accent-[#C8A951] flex-shrink-0"
+                  />
+                  <label htmlFor="sms_consent_cs" className="text-[11px] text-gray-500 leading-relaxed cursor-pointer">
+                    I agree to receive text messages from <strong className="text-gray-400">STR - Strength Through Resilience</strong> regarding my inquiry, account updates, service notifications, and promotional offers. Message frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out. Reply HELP for help. Consent is not a condition of purchase.{' '}
+                    <Link href="/privacy" className="text-str-gold/70 underline hover:text-str-gold">Privacy Policy</Link>{' '}&amp;{' '}
+                    <Link href="/terms" className="text-str-gold/70 underline hover:text-str-gold">Terms of Service</Link>.
+                  </label>
+                </div>
+
+                {errorMsg && (
+                  <p className="text-red-400 text-xs text-center">{errorMsg}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={formState === 'submitting'}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-str-gold text-black font-display font-bold uppercase tracking-wider text-sm rounded hover:bg-str-gold/90 transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  <Send className="w-4 h-4" />
+                  {formState === 'submitting' ? 'Sending...' : 'Get In Touch'}
+                </button>
+              </form>
+            )}
+          </div>
 
           {/* Social Links */}
           {hasSocials && (

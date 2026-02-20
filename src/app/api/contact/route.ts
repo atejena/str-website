@@ -1,83 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-
-// Validation schema
-const contactSchema = z.object({
-  firstName: z.string().min(2),
-  lastName: z.string().min(2),
-  email: z.string().email(),
-  phone: z.string().optional(),
-  subject: z.string().min(1),
-  message: z.string().min(10),
-  honeypot: z.string().max(0), // Anti-spam
-});
+import { createAdminClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validate the request body
-    const result = contactSchema.safeParse(body);
+    const name = body.name || [body.firstName, body.lastName].filter(Boolean).join(' ');
+    const email = body.email;
+    const phone = body.phone || null;
+    const message = body.message || '';
+    const subject = body.subject || null;
+    const sourcePage = body.source_page || null;
+    const smsConsent = body.sms_consent || false;
 
-    if (!result.success) {
+    // Validate required fields
+    if (!name || !email) {
       return NextResponse.json(
-        { error: 'Invalid form data', details: result.error.flatten() },
+        { error: 'Name and email are required.' },
         { status: 400 }
       );
     }
 
-    const { firstName, lastName, email, phone, subject, message, honeypot } = result.data;
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'Please enter a valid email address.' },
+        { status: 400 }
+      );
+    }
 
-    // Anti-spam check
-    if (honeypot) {
-      // Bot detected - silently succeed but don't process
+    // Anti-spam check (honeypot from contact page form)
+    if (body.honeypot) {
       return NextResponse.json({ success: true });
     }
 
-    // PLACEHOLDER: Add your email service integration here
-    // Options: Resend, SendGrid, Mailgun, Nodemailer, etc.
-    //
-    // Example with Resend:
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    // await resend.emails.send({
-    //   from: 'STR Website <noreply@trainwithstr.com>',
-    //   to: process.env.CONTACT_EMAIL_TO,
-    //   subject: `New Contact Form: ${subject}`,
-    //   html: `
-    //     <h2>New Contact Form Submission</h2>
-    //     <p><strong>Name:</strong> ${firstName} ${lastName}</p>
-    //     <p><strong>Email:</strong> ${email}</p>
-    //     <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
-    //     <p><strong>Subject:</strong> ${subject}</p>
-    //     <p><strong>Message:</strong></p>
-    //     <p>${message}</p>
-    //   `,
-    // });
+    const supabase = await createAdminClient();
 
-    // PLACEHOLDER: Save to Supabase contact_submissions table
-    // const { error } = await supabase.from('contact_submissions').insert({
-    //   first_name: firstName,
-    //   last_name: lastName,
-    //   email,
-    //   phone,
-    //   subject,
-    //   message,
-    //   status: 'new',
-    // });
-
-    // Log for now (remove in production)
-    console.log('Contact form submission:', {
-      name: `${firstName} ${lastName}`,
+    const { error } = await supabase.from('contact_submissions').insert({
+      name,
       email,
       phone,
-      subject,
       message,
-      timestamp: new Date().toISOString(),
+      subject,
+      source_page: sourcePage,
+      sms_consent: smsConsent,
     });
+
+    if (error) {
+      console.error('Contact form submission error:', error);
+      // Still return success to user even if DB insert fails
+      // (column may not exist yet for sms_consent — try without it)
+      if (error.message?.includes('sms_consent')) {
+        const { error: retryError } = await supabase.from('contact_submissions').insert({
+          name,
+          email,
+          phone,
+          message,
+          subject,
+          source_page: sourcePage,
+        });
+        if (retryError) {
+          console.error('Contact form retry error:', retryError);
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Thank you for your message. We\'ll get back to you soon!',
+      message: "Thank you! We'll get back to you soon.",
     });
   } catch (error) {
     console.error('Contact form error:', error);
