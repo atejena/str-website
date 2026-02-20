@@ -1,8 +1,11 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, Mail, Instagram, Facebook } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Container } from './Container';
+import { usePageVisibility } from '@/lib/contexts/page-visibility';
 
 interface FooterProps {
   socialLinks?: {
@@ -14,14 +17,20 @@ interface FooterProps {
 
 export function Footer({ socialLinks = {}, contactEmail = 'info@trainwithstr.com' }: FooterProps) {
   const currentYear = new Date().getFullYear();
+  const pageVisibility = usePageVisibility();
 
-  const navigationLinks = [
-    { href: '/about', label: 'About' },
-    { href: '/classes', label: 'Classes' },
-    { href: '/pricing', label: 'Pricing' },
-    { href: '/blog', label: 'Blog' },
-    { href: '/contact', label: 'Contact' },
+  const allNavigationLinks = [
+    { href: '/about', label: 'About', key: 'about' },
+    { href: '/classes', label: 'Classes', key: 'classes' },
+    { href: '/pricing', label: 'Pricing', key: 'pricing' },
+    { href: '/blog', label: 'Blog', key: 'blog' },
+    { href: '/contact', label: 'Contact', key: 'contact' },
   ];
+
+  // Filter navigation links based on page visibility
+  const navigationLinks = allNavigationLinks.filter(
+    link => pageVisibility[link.key as keyof typeof pageVisibility] !== false
+  );
 
   return (
     <footer className="bg-str-black border-t border-concrete/10" role="contentinfo">

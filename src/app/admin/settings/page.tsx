@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Settings as SettingsIcon, RefreshCw, Construction, ExternalLink } from 'lucide-react'
+import { Save, Settings as SettingsIcon, RefreshCw, Construction, ExternalLink, Layout } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -54,7 +54,7 @@ export default function AdminSettingsPage() {
     }
   }
 
-  const updateSetting = (key: string, value: any) => {
+  const updateSetting = (key: string, value: string | number | boolean) => {
     setSettings(prev => ({ ...prev, [key]: value }))
   }
 
@@ -191,6 +191,56 @@ export default function AdminSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Page Visibility */}
+      <Card>
+        <CardContent className="p-6">
+          <h2 className="text-xl font-display font-bold text-foreground mb-6 flex items-center gap-2">
+            <Layout className="w-5 h-5" />
+            Page Visibility
+          </h2>
+          <p className="text-sm text-muted mb-6">
+            Control which pages are visible to visitors. When a page is disabled, it will be hidden from navigation and redirect to the homepage.
+          </p>
+          <div className="space-y-4">
+            {[
+              { key: 'classes', label: 'Classes', path: '/classes' },
+              { key: 'trainers', label: 'Trainers', path: '/trainers' },
+              { key: 'pricing', label: 'Pricing', path: '/pricing' },
+              { key: 'programming', label: 'Programming', path: '/programming' },
+              { key: 'about', label: 'About', path: '/about' },
+              { key: 'contact', label: 'Contact', path: '/contact' },
+              { key: 'blog', label: 'Blog', path: '/blog' },
+              { key: 'gallery', label: 'Gallery', path: '/gallery' },
+              { key: 'testimonials', label: 'Testimonials', path: '/testimonials' },
+              { key: 'faq', label: 'FAQ', path: '/faq' },
+              { key: 'careers', label: 'Careers', path: '/careers' },
+            ].map((page) => (
+              <div key={page.key} className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium">{page.label}</label>
+                  <p className="text-xs text-muted mt-0.5">{page.path}</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={settings[`page_visible_${page.key}`] !== false}
+                  onClick={() => updateSetting(`page_visible_${page.key}`, !settings[`page_visible_${page.key}`])}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                    settings[`page_visible_${page.key}`] !== false ? 'bg-str-gold' : 'bg-border'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings[`page_visible_${page.key}`] !== false ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Gym Info */}
       <Card>
         <CardContent className="p-6">
@@ -286,12 +336,12 @@ export default function AdminSettingsPage() {
               <div key={day} className="grid grid-cols-3 gap-4 items-center">
                 <div className="capitalize font-medium text-foreground">{day}</div>
                 <Input
-                  value={settings[`hours_${day}_open`] || ''}
+                  value={(settings[`hours_${day}_open`] as string) || ''}
                   onChange={(e) => updateSetting(`hours_${day}_open`, e.target.value)}
                   placeholder="9:00 AM"
                 />
                 <Input
-                  value={settings[`hours_${day}_close`] || ''}
+                  value={(settings[`hours_${day}_close`] as string) || ''}
                   onChange={(e) => updateSetting(`hours_${day}_close`, e.target.value)}
                   placeholder="8:00 PM"
                 />
@@ -543,7 +593,7 @@ export default function AdminSettingsPage() {
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={settings.jotform_enabled === true || settings.jotform_enabled === 'true'}
+                  checked={settings.jotform_enabled === true}
                   onChange={(e) => updateSetting('jotform_enabled', e.target.checked)}
                   className="w-4 h-4"
                 />

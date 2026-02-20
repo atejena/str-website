@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -10,20 +10,27 @@ import { Button } from '@/components/ui/Button';
 import { Container } from './Container';
 import { ThemeToggle } from './ThemeToggle';
 import { MobileNav } from './MobileNav';
+import { usePageVisibility } from '@/lib/contexts/page-visibility';
 
-const navLinks = [
-  { href: '/classes', label: 'Classes' },
-  { href: '/trainers', label: 'Trainers' },
-  { href: '/pricing', label: 'Pricing' },
-  { href: '/programming', label: 'Programming' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
+const allNavLinks = [
+  { href: '/classes', label: 'Classes', key: 'classes' },
+  { href: '/trainers', label: 'Trainers', key: 'trainers' },
+  { href: '/pricing', label: 'Pricing', key: 'pricing' },
+  { href: '/programming', label: 'Programming', key: 'programming' },
+  { href: '/about', label: 'About', key: 'about' },
+  { href: '/contact', label: 'Contact', key: 'contact' },
 ];
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const pageVisibility = usePageVisibility();
+
+  // Filter nav links based on page visibility
+  const navLinks = useMemo(() => {
+    return allNavLinks.filter(link => pageVisibility[link.key as keyof typeof pageVisibility] !== false);
+  }, [pageVisibility]);
 
   useEffect(() => {
     const handleScroll = () => {

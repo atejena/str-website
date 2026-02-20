@@ -275,7 +275,6 @@ export async function updatePricingPlan(id: string, formData: FormData) {
     cta_text: formData.get('cta_text') as string || 'Get Started',
     active: formData.get('active') === 'true',
     sort_order: parseInt(formData.get('sort_order') as string) || 0,
-    updated_at: new Date().toISOString(),
   }
   
   const { error } = await supabase
@@ -730,7 +729,7 @@ export async function getLeads(): Promise<any[]> {
 export async function updateLead(id: string, updates: { read?: boolean; responded?: boolean; notes?: string }) {
   const supabase = await createAdminClient()
   
-  const updateData: any = {
+  const updateData: { updated_at: string; read?: boolean; responded?: boolean; notes?: string } = {
     updated_at: new Date().toISOString(),
   }
   
@@ -767,54 +766,68 @@ export async function getSettings() {
   if (error) throw error
   
   // Convert nested DB structure to flat structure for the admin UI
-  const settings: Record<string, any> = {}
+  const settings: Record<string, string | number | boolean> = {}
   
-  data?.forEach((setting: { key: string; value: any }) => {
+  data?.forEach((setting: { key: string; value: unknown }) => {
     const { key, value } = setting
     
     // Handle nested structures
-    if (key === 'gym_info') {
-      settings.gym_name = value?.name || ''
-      settings.tagline = value?.tagline || ''
-      settings.phone = value?.phone || ''
-      settings.email = value?.email || ''
-      settings.address_street = value?.address?.street || ''
-      settings.address_city = value?.address?.city || ''
-      settings.address_state = value?.address?.state || ''
-      settings.address_zip = value?.address?.zip || ''
-    } else if (key === 'business_hours') {
+    if (key === 'gym_info' && typeof value === 'object' && value !== null) {
+      const gymInfo = value as Record<string, unknown>
+      settings.gym_name = (gymInfo.name as string) || ''
+      settings.tagline = (gymInfo.tagline as string) || ''
+      settings.phone = (gymInfo.phone as string) || ''
+      settings.email = (gymInfo.email as string) || ''
+      const address = gymInfo.address as Record<string, unknown> | undefined
+      settings.address_street = (address?.street as string) || ''
+      settings.address_city = (address?.city as string) || ''
+      settings.address_state = (address?.state as string) || ''
+      settings.address_zip = (address?.zip as string) || ''
+    } else if (key === 'business_hours' && typeof value === 'object' && value !== null) {
+      const hours = value as Record<string, Record<string, string>>
       const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
       days.forEach(day => {
-        settings[`hours_${day}_open`] = value?.[day]?.open || ''
-        settings[`hours_${day}_close`] = value?.[day]?.close || ''
+        settings[`hours_${day}_open`] = hours[day]?.open || ''
+        settings[`hours_${day}_close`] = hours[day]?.close || ''
       })
-    } else if (key === 'social_links') {
-      settings.social_facebook = value?.facebook || ''
-      settings.social_instagram = value?.instagram || ''
-      settings.social_youtube = value?.youtube || ''
-      settings.social_tiktok = value?.tiktok || ''
-    } else if (key === 'integrations') {
-      settings.trainheroic_whiteboard_url = value?.trainheroic_whiteboard_url || ''
-      settings.gohighlevel_widget_id = value?.gohighlevel_widget_id || ''
-      settings.google_analytics_id = value?.google_analytics_id || ''
-      settings.google_maps_embed_url = value?.google_maps_embed_url || ''
-      settings.ghl_get_started_form_url = value?.ghl_get_started_form_url || ''
-      settings.ghl_contact_form_url = value?.ghl_contact_form_url || ''
-      settings.ghl_general_form_url = value?.ghl_general_form_url || ''
-    } else if (key === 'jotform') {
-      settings.jotform_enabled = value?.enabled || false
-      settings.jotform_form_id = value?.form_id || ''
-      settings.jotform_embed_url = value?.embed_url || ''
+    } else if (key === 'social_links' && typeof value === 'object' && value !== null) {
+      const social = value as Record<string, string>
+      settings.social_facebook = social.facebook || ''
+      settings.social_instagram = social.instagram || ''
+      settings.social_youtube = social.youtube || ''
+      settings.social_tiktok = social.tiktok || ''
+    } else if (key === 'integrations' && typeof value === 'object' && value !== null) {
+      const integrations = value as Record<string, string>
+      settings.trainheroic_whiteboard_url = integrations.trainheroic_whiteboard_url || ''
+      settings.gohighlevel_widget_id = integrations.gohighlevel_widget_id || ''
+      settings.google_analytics_id = integrations.google_analytics_id || ''
+      settings.google_maps_embed_url = integrations.google_maps_embed_url || ''
+      settings.ghl_get_started_form_url = integrations.ghl_get_started_form_url || ''
+      settings.ghl_contact_form_url = integrations.ghl_contact_form_url || ''
+      settings.ghl_general_form_url = integrations.ghl_general_form_url || ''
+    } else if (key === 'jotform' && typeof value === 'object' && value !== null) {
+      const jotform = value as Record<string, unknown>
+      settings.jotform_enabled = (jotform.enabled as boolean) || false
+      settings.jotform_form_id = (jotform.form_id as string) || ''
+      settings.jotform_embed_url = (jotform.embed_url as string) || ''
     } else if (key === 'terms_content') {
-      settings.terms_content = value || ''
+      settings.terms_content = (value as string) || ''
     } else if (key === 'privacy_content') {
-      settings.privacy_content = value || ''
-    } else if (key === 'maintenance_mode') {
-      settings.maintenance_enabled = value?.enabled ?? false
-      settings.maintenance_title = value?.title || 'Coming Soon'
-      settings.maintenance_subtitle = value?.subtitle || ''
-      settings.maintenance_show_logo = value?.show_logo ?? true
-    } else {
+      settings.privacy_content = (value as string) || ''
+    } else if (key === 'maintenance_mode' && typeof value === 'object' && value !== null) {
+      const maintenance = value as Record<string, unknown>
+      settings.maintenance_enabled = (maintenance.enabled as boolean) ?? false
+      settings.maintenance_title = (maintenance.title as string) || 'Coming Soon'
+      settings.maintenance_subtitle = (maintenance.subtitle as string) || ''
+      settings.maintenance_show_logo = (maintenance.show_logo as boolean) ?? true
+    } else if (key === 'page_visibility' && typeof value === 'object' && value !== null) {
+      // Flatten page_visibility object to page_visible_* keys
+      const visibility = value as Record<string, boolean>
+      const pages = ['classes', 'trainers', 'pricing', 'programming', 'about', 'contact', 'blog', 'gallery', 'testimonials', 'faq', 'careers']
+      pages.forEach(page => {
+        settings[`page_visible_${page}`] = visibility[page] ?? true
+      })
+    } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
       // Keep other settings as-is (instagram_handle, google_place_id, etc.)
       settings[key] = value
     }
@@ -827,21 +840,21 @@ export async function updateSettings(settings: Record<string, any>) {
   const supabase = await createAdminClient()
   
   // Re-group flat settings back into nested structure
-  const updates: { key: string; value: any; updated_at: string }[] = []
+  const updates: { key: string; value: unknown; updated_at: string }[] = []
   
   // Gym Info
   updates.push({
     key: 'gym_info',
     value: {
-      name: settings.gym_name || '',
-      tagline: settings.tagline || '',
-      phone: settings.phone || '',
-      email: settings.email || '',
+      name: (settings.gym_name as string) || '',
+      tagline: (settings.tagline as string) || '',
+      phone: (settings.phone as string) || '',
+      email: (settings.email as string) || '',
       address: {
-        street: settings.address_street || '',
-        city: settings.address_city || '',
-        state: settings.address_state || '',
-        zip: settings.address_zip || '',
+        street: (settings.address_street as string) || '',
+        city: (settings.address_city as string) || '',
+        state: (settings.address_state as string) || '',
+        zip: (settings.address_zip as string) || '',
       }
     },
     updated_at: new Date().toISOString(),
@@ -852,8 +865,8 @@ export async function updateSettings(settings: Record<string, any>) {
   const businessHours: Record<string, { open: string; close: string }> = {}
   days.forEach(day => {
     businessHours[day] = {
-      open: settings[`hours_${day}_open`] || '',
-      close: settings[`hours_${day}_close`] || '',
+      open: (settings[`hours_${day}_open`] as string) || '',
+      close: (settings[`hours_${day}_close`] as string) || '',
     }
   })
   updates.push({
@@ -866,10 +879,10 @@ export async function updateSettings(settings: Record<string, any>) {
   updates.push({
     key: 'social_links',
     value: {
-      facebook: settings.social_facebook || '',
-      instagram: settings.social_instagram || '',
-      youtube: settings.social_youtube || '',
-      tiktok: settings.social_tiktok || '',
+      facebook: (settings.social_facebook as string) || '',
+      instagram: (settings.social_instagram as string) || '',
+      youtube: (settings.social_youtube as string) || '',
+      tiktok: (settings.social_tiktok as string) || '',
     },
     updated_at: new Date().toISOString(),
   })
@@ -878,13 +891,13 @@ export async function updateSettings(settings: Record<string, any>) {
   updates.push({
     key: 'integrations',
     value: {
-      trainheroic_whiteboard_url: settings.trainheroic_whiteboard_url || '',
-      gohighlevel_widget_id: settings.gohighlevel_widget_id || '',
-      google_analytics_id: settings.google_analytics_id || '',
-      google_maps_embed_url: settings.google_maps_embed_url || '',
-      ghl_get_started_form_url: settings.ghl_get_started_form_url || '',
-      ghl_contact_form_url: settings.ghl_contact_form_url || '',
-      ghl_general_form_url: settings.ghl_general_form_url || '',
+      trainheroic_whiteboard_url: (settings.trainheroic_whiteboard_url as string) || '',
+      gohighlevel_widget_id: (settings.gohighlevel_widget_id as string) || '',
+      google_analytics_id: (settings.google_analytics_id as string) || '',
+      google_maps_embed_url: (settings.google_maps_embed_url as string) || '',
+      ghl_get_started_form_url: (settings.ghl_get_started_form_url as string) || '',
+      ghl_contact_form_url: (settings.ghl_contact_form_url as string) || '',
+      ghl_general_form_url: (settings.ghl_general_form_url as string) || '',
     },
     updated_at: new Date().toISOString(),
   })
@@ -894,8 +907,8 @@ export async function updateSettings(settings: Record<string, any>) {
     key: 'jotform',
     value: {
       enabled: settings.jotform_enabled === true || settings.jotform_enabled === 'true',
-      form_id: settings.jotform_form_id || '',
-      embed_url: settings.jotform_embed_url || '',
+      form_id: (settings.jotform_form_id as string) || '',
+      embed_url: (settings.jotform_embed_url as string) || '',
     },
     updated_at: new Date().toISOString(),
   })
@@ -904,7 +917,7 @@ export async function updateSettings(settings: Record<string, any>) {
   if (settings.terms_content !== undefined) {
     updates.push({
       key: 'terms_content',
-      value: settings.terms_content,
+      value: settings.terms_content as string,
       updated_at: new Date().toISOString(),
     })
   }
@@ -913,7 +926,7 @@ export async function updateSettings(settings: Record<string, any>) {
   if (settings.privacy_content !== undefined) {
     updates.push({
       key: 'privacy_content',
-      value: settings.privacy_content,
+      value: settings.privacy_content as string,
       updated_at: new Date().toISOString(),
     })
   }
@@ -923,10 +936,27 @@ export async function updateSettings(settings: Record<string, any>) {
     key: 'maintenance_mode',
     value: {
       enabled: settings.maintenance_enabled === true || settings.maintenance_enabled === 'true',
-      title: settings.maintenance_title || 'Coming Soon',
-      subtitle: settings.maintenance_subtitle || '',
+      title: (settings.maintenance_title as string) || 'Coming Soon',
+      subtitle: (settings.maintenance_subtitle as string) || '',
       show_logo: settings.maintenance_show_logo === true || settings.maintenance_show_logo === 'true',
     },
+    updated_at: new Date().toISOString(),
+  })
+
+  // Page Visibility
+  const pages = ['classes', 'trainers', 'pricing', 'programming', 'about', 'contact', 'blog', 'gallery', 'testimonials', 'faq', 'careers']
+  const pageVisibility: Record<string, boolean> = {}
+  pages.forEach(page => {
+    const key = `page_visible_${page}`
+    if (settings[key] !== undefined) {
+      pageVisibility[page] = settings[key] === true || settings[key] === 'true'
+    } else {
+      pageVisibility[page] = true // Default to enabled
+    }
+  })
+  updates.push({
+    key: 'page_visibility',
+    value: pageVisibility,
     updated_at: new Date().toISOString(),
   })
 
@@ -936,7 +966,7 @@ export async function updateSettings(settings: Record<string, any>) {
     if (settings[key] !== undefined) {
       updates.push({
         key,
-        value: settings[key],
+        value: settings[key] as string,
         updated_at: new Date().toISOString(),
       })
     }

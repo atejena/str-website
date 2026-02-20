@@ -6,6 +6,7 @@ import GoHighLevelWidget from '@/components/GoHighLevelWidget';
 import MaintenanceGuard from '@/components/MaintenanceGuard';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getGymInfo } from '@/lib/site-settings';
+import { PageVisibilityProvider } from '@/lib/contexts/page-visibility';
 
 const oswald = Oswald({
   variable: '--font-oswald',
@@ -200,6 +201,15 @@ export default async function RootLayout({
   // Fetch gym info for dynamic email/contact details
   const gymInfo = await getGymInfo();
 
+  // Fetch page visibility settings
+  const { data: pageVisibilityRow } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'page_visibility')
+    .single();
+
+  const pageVisibility = (pageVisibilityRow?.value as Record<string, boolean>) || {};
+
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
@@ -212,17 +222,19 @@ export default async function RootLayout({
         className={`${oswald.variable} ${inter.variable} min-h-screen bg-background text-foreground antialiased`}
       >
         <ToastProvider>
-          <a href="#main-content" className="skip-link">
-            Skip to main content
-          </a>
-          <MaintenanceGuard
-            maintenance={maintenanceSettings}
-            socialLinks={socialLinks}
-            hasSession={hasSession}
-            contactEmail={gymInfo.email}
-          >
-            {children}
-          </MaintenanceGuard>
+          <PageVisibilityProvider visibility={pageVisibility}>
+            <a href="#main-content" className="skip-link">
+              Skip to main content
+            </a>
+            <MaintenanceGuard
+              maintenance={maintenanceSettings}
+              socialLinks={socialLinks}
+              hasSession={hasSession}
+              contactEmail={gymInfo.email}
+            >
+              {children}
+            </MaintenanceGuard>
+          </PageVisibilityProvider>
         </ToastProvider>
         {ghlWidgetId && <GoHighLevelWidget widgetId={ghlWidgetId} />}
       </body>
