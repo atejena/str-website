@@ -47,7 +47,7 @@ export function GetStartedForm({ jotform, ghlFormUrl }: GetStartedFormProps = {}
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
             <p className="font-display text-sm font-bold uppercase tracking-widest text-str-gold mb-3">
-              STR - Strength Through Resilience
+              STR Fitness LLC
             </p>
             <h2 className="font-display text-h2 font-semibold uppercase text-white mb-4 tracking-wider">
               Get Started
@@ -149,7 +149,7 @@ export function GetStartedForm({ jotform, ghlFormUrl }: GetStartedFormProps = {}
                     className="mt-1 h-4 w-4 rounded border-concrete/40 bg-str-black text-str-gold focus:ring-str-gold/30 cursor-pointer accent-[#C8A951]"
                   />
                   <label htmlFor="sms_consent" className="text-xs text-concrete/70 leading-relaxed cursor-pointer">
-                    I agree to receive text messages from <strong className="text-concrete">STR - Strength Through Resilience</strong> regarding my inquiry, account updates, service notifications, and promotional offers. Message frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out. Reply HELP for help. This consent is not a condition of purchase.{' '}
+                    I agree to receive text messages from <strong className="text-concrete">STR Fitness LLC</strong> regarding my inquiry, account updates, service notifications, and promotional offers. Message frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out. Reply HELP for help. This consent is not a condition of purchase.{' '}
                     <a href="/privacy" className="text-str-gold underline hover:text-str-gold/80">Privacy Policy</a>{' '}&amp;{' '}
                     <a href="/terms" className="text-str-gold underline hover:text-str-gold/80">Terms of Service</a>.
                   </label>

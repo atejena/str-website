@@ -136,7 +136,7 @@ export default function UnderConstruction({
             ) : (
               <form onSubmit={handleFormSubmit} className="space-y-4 text-left">
                 <p className="text-center font-display text-sm font-bold uppercase tracking-widest text-str-gold mb-1">
-                  STR - Strength Through Resilience
+                  STR Fitness LLC
                 </p>
                 <p className="text-center text-gray-400 text-sm mb-4">
                   Interested? Drop us a message and we&apos;ll keep you posted.
@@ -182,7 +182,7 @@ export default function UnderConstruction({
                     className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent cursor-pointer accent-[#C8A951] flex-shrink-0"
                   />
                   <label htmlFor="sms_consent_cs" className="text-[11px] text-gray-500 leading-relaxed cursor-pointer">
-                    I agree to receive text messages from <strong className="text-gray-400">STR - Strength Through Resilience</strong> regarding my inquiry, account updates, service notifications, and promotional offers. Message frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out. Reply HELP for help. Consent is not a condition of purchase.{' '}
+                    I agree to receive text messages from <strong className="text-gray-400">STR Fitness LLC</strong> regarding my inquiry, account updates, service notifications, and promotional offers. Message frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out. Reply HELP for help. Consent is not a condition of purchase.{' '}
                     <Link href="/privacy" className="text-str-gold/70 underline hover:text-str-gold">Privacy Policy</Link>{' '}&amp;{' '}
                     <Link href="/terms" className="text-str-gold/70 underline hover:text-str-gold">Terms of Service</Link>.
                   </label>
