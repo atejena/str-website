@@ -5,6 +5,7 @@ import { ToastProvider } from '@/components/ui/Toast';
 import GoHighLevelWidget from '@/components/GoHighLevelWidget';
 import MaintenanceGuard from '@/components/MaintenanceGuard';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { getGymInfo } from '@/lib/site-settings';
 
 const oswald = Oswald({
   variable: '--font-oswald',
@@ -99,53 +100,53 @@ export const metadata: Metadata = {
   manifest: '/site.webmanifest',
 };
 
-// JSON-LD Structured Data for Organization
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'HealthClub',
-  name: 'STR - Strength Through Resilience',
-  alternateName: 'STR Fitness',
-  description:
-    'Premium strength and conditioning gym offering personal training, group fitness classes, and Hyrox/Deka conditioning in Cranford, NJ.',
-  url: 'https://trainwithstr.com',
-  logo: 'https://trainwithstr.com/images/str-logo.webp',
-  image: 'https://trainwithstr.com/images/og-image.jpg',
-  telephone: '', // To be added
-  email: 'info@trainwithstr.com',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: '8 Eastman St, Suite 3',
-    addressLocality: 'Cranford',
-    addressRegion: 'NJ',
-    postalCode: '07016',
-    addressCountry: 'US',
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: 40.6584,
-    longitude: -74.2995,
-  },
-  openingHoursSpecification: [
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      opens: '05:00',
-      closes: '22:00',
+// JSON-LD base — email/phone populated dynamically in the component
+function buildJsonLd(email: string, phone: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HealthClub',
+    name: 'STR - Strength Through Resilience',
+    alternateName: 'STR Fitness',
+    description:
+      'Premium strength and conditioning gym offering personal training, group fitness classes, and Hyrox/Deka conditioning in Cranford, NJ.',
+    url: 'https://trainwithstr.com',
+    logo: 'https://trainwithstr.com/images/str-logo.webp',
+    image: 'https://trainwithstr.com/images/og-image.jpg',
+    telephone: phone,
+    email: email,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '8 Eastman St, Suite 3',
+      addressLocality: 'Cranford',
+      addressRegion: 'NJ',
+      postalCode: '07016',
+      addressCountry: 'US',
     },
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Saturday', 'Sunday'],
-      opens: '07:00',
-      closes: '20:00',
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 40.6584,
+      longitude: -74.2995,
     },
-  ],
-  priceRange: '$$',
-  currenciesAccepted: 'USD',
-  paymentAccepted: 'Cash, Credit Card',
-  sameAs: [
-    // Social media links to be added
-  ],
-};
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '05:00',
+        closes: '22:00',
+      },
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Saturday', 'Sunday'],
+        opens: '07:00',
+        closes: '20:00',
+      },
+    ],
+    priceRange: '$$',
+    currenciesAccepted: 'USD',
+    paymentAccepted: 'Cash, Credit Card',
+    sameAs: [],
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -196,12 +197,15 @@ export default async function RootLayout({
   const { data: { user } } = await supabase.auth.getUser();
   const hasSession = !!user;
 
+  // Fetch gym info for dynamic email/contact details
+  const gymInfo = await getGymInfo();
+
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(gymInfo.email, gymInfo.phone)) }}
         />
       </head>
       <body
@@ -215,6 +219,7 @@ export default async function RootLayout({
             maintenance={maintenanceSettings}
             socialLinks={socialLinks}
             hasSession={hasSession}
+            contactEmail={gymInfo.email}
           >
             {children}
           </MaintenanceGuard>

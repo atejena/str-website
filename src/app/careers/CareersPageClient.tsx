@@ -23,6 +23,7 @@ interface CareerPosting {
 }
 
 interface CareersPageClientProps {
+  contactEmail?: string;
   postings: CareerPosting[];
   socialLinks: Record<string, string>;
 }
@@ -40,7 +41,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-export default function CareersPageClient({ postings, socialLinks }: CareersPageClientProps) {
+export default function CareersPageClient({ postings, socialLinks, contactEmail = 'info@trainwithstr.com' }: CareersPageClientProps) {
   return (
     <>
       <Header />
@@ -166,7 +167,7 @@ export default function CareersPageClient({ postings, socialLinks }: CareersPage
 
                     {/* Apply button */}
                     <a
-                      href={`mailto:info@trainwithstr.com?subject=Application: ${encodeURIComponent(posting.title)}`}
+                      href={`mailto:${contactEmail}?subject=Application: ${encodeURIComponent(posting.title)}`}
                       className="inline-block"
                     >
                       <Button variant="primary" size="md">
@@ -198,7 +199,7 @@ export default function CareersPageClient({ postings, socialLinks }: CareersPage
                 </p>
 
                 <a
-                  href="mailto:info@trainwithstr.com?subject=Resume Submission"
+                  href={`mailto:${contactEmail}?subject=Resume Submission`}
                   className="inline-flex items-center gap-2 text-str-gold hover:text-str-gold/80 transition-colors font-medium"
                 >
                   <Mail className="w-5 h-5" />

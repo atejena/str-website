@@ -22,18 +22,20 @@ interface MaintenanceGuardProps {
   maintenance: MaintenanceSettings;
   socialLinks: SocialLinks;
   hasSession: boolean;
+  contactEmail?: string;
   children: React.ReactNode;
 }
 
 /** Paths that are always accessible even during maintenance */
 const BYPASS_PATHS = ['/admin', '/login', '/privacy', '/terms'];
 
-function MaintenanceGuardInner({
-  maintenance,
-  socialLinks,
-  hasSession,
-  children,
-}: MaintenanceGuardProps) {
+function MaintenanceGuardInner(props: MaintenanceGuardProps) {
+  const {
+    maintenance,
+    socialLinks,
+    hasSession,
+    children,
+  } = props;
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -67,6 +69,7 @@ function MaintenanceGuardInner({
       subtitle={maintenance.subtitle || ''}
       showLogo={maintenance.showLogo}
       socialLinks={socialLinks}
+      contactEmail={props.contactEmail}
     />
   );
 }

@@ -9,6 +9,7 @@ import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isMaintenanceMode } from '@/lib/maintenance';
+import { getGymInfo } from '@/lib/site-settings';
 
 async function getTermsContent() {
   const supabase = await createServerSupabaseClient();
@@ -22,10 +23,12 @@ async function getTermsContent() {
 }
 
 export default async function TermsPage() {
-  const [termsMarkdown, maintenance] = await Promise.all([
+  const [termsMarkdown, maintenance, gymInfo] = await Promise.all([
     getTermsContent(),
     isMaintenanceMode(),
+    getGymInfo(),
   ]);
+  const contactEmail = gymInfo.email;
   const termsHtml = marked(termsMarkdown);
 
   return (
@@ -81,7 +84,7 @@ export default async function TermsPage() {
             </p>
             <ul>
               <li>Replying <strong>STOP</strong> to any text message from STR</li>
-              <li>Emailing <a href="mailto:info@trainwithstr.com">info@trainwithstr.com</a> with the subject &quot;SMS Opt-Out&quot;</li>
+              <li>Emailing <a href={`mailto:${contactEmail}`}>{contactEmail}</a> with the subject &quot;SMS Opt-Out&quot;</li>
               <li>Contacting us at 8 Eastman St, Suite 3, Cranford, NJ 07016</li>
             </ul>
             <p>
@@ -114,7 +117,7 @@ export default async function TermsPage() {
             </p>
             <ul>
               <li>Reply <strong>HELP</strong> to any text message</li>
-              <li>Email us at <a href="mailto:info@trainwithstr.com">info@trainwithstr.com</a></li>
+              <li>Email us at <a href={`mailto:${contactEmail}`}>{contactEmail}</a></li>
               <li>Visit us at 8 Eastman St, Suite 3, Cranford, NJ 07016</li>
             </ul>
 
@@ -132,14 +135,14 @@ export default async function TermsPage() {
               Have questions about our terms of service?
             </p>
             <Button asChild variant="secondary">
-              <Link href={maintenance ? "mailto:info@trainwithstr.com" : "/contact"}>
+              <Link href={maintenance ? `mailto:${contactEmail}` : "/contact"}>
                 Contact Us
               </Link>
             </Button>
           </div>
         </Section>
       </main>
-      {maintenance ? <MinimalFooter /> : <Footer />}
+      {maintenance ? <MinimalFooter contactEmail={contactEmail} /> : <Footer contactEmail={contactEmail} />}
     </>
   );
 }

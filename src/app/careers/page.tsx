@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { getGymInfo } from '@/lib/site-settings';
 import CareersPageClient from './CareersPageClient';
 
 export default async function CareersPage() {
@@ -19,11 +20,13 @@ export default async function CareersPage() {
     .single();
 
   const socialLinks = settings?.value || {};
+  const gymInfo = await getGymInfo();
 
   return (
     <CareersPageClient
       postings={postings || []}
       socialLinks={socialLinks}
+      contactEmail={gymInfo.email}
     />
   );
 }

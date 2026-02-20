@@ -11,6 +11,7 @@ import {
   GalleryPreview,
 } from '@/components/sections';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { getGymInfo } from '@/lib/site-settings';
 
 export default async function Home() {
   const supabase = await createServerSupabaseClient();
@@ -71,6 +72,8 @@ export default async function Home() {
 
   const instagramUrl = (instagramSetting?.value as string) || '';
 
+  const gymInfo = await getGymInfo();
+
   return (
     <>
       <Header />
@@ -79,7 +82,7 @@ export default async function Home() {
         <HeroHome />
 
         {/* 2. Find Us - Contact Information */}
-        <FindUs />
+        <FindUs contactEmail={gymInfo.email} />
 
         {/* 3. Get Started - Signup Form */}
         <GetStartedForm jotform={jotform} ghlFormUrl={ghlGetStartedFormUrl} />
@@ -88,7 +91,7 @@ export default async function Home() {
         <OurOfferings />
 
         {/* 5. Mini Banner - Contact Info + Location */}
-        <MiniBanner />
+        <MiniBanner contactEmail={gymInfo.email} />
 
         {/* 6. Google Maps Embed */}
         <GoogleMaps />
@@ -103,7 +106,7 @@ export default async function Home() {
       </main>
 
       {/* 9. Footer */}
-      <Footer socialLinks={socialLinks} />
+      <Footer socialLinks={socialLinks} contactEmail={gymInfo.email} />
     </>
   );
 }

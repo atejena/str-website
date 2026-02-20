@@ -9,6 +9,7 @@ import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isMaintenanceMode } from '@/lib/maintenance';
+import { getGymInfo } from '@/lib/site-settings';
 
 async function getPrivacyContent() {
   const supabase = await createServerSupabaseClient();
@@ -22,10 +23,12 @@ async function getPrivacyContent() {
 }
 
 export default async function PrivacyPage() {
-  const [privacyMarkdown, maintenance] = await Promise.all([
+  const [privacyMarkdown, maintenance, gymInfo] = await Promise.all([
     getPrivacyContent(),
     isMaintenanceMode(),
+    getGymInfo(),
   ]);
+  const contactEmail = gymInfo.email;
   const privacyHtml = marked(privacyMarkdown);
 
   return (
@@ -78,10 +81,10 @@ export default async function PrivacyPage() {
               <strong>Message frequency:</strong> Message frequency varies based on your interactions and account activity. You may receive up to 10 messages per month.
             </p>
             <p>
-              <strong>Opt-out:</strong> You can opt out at any time by replying STOP to any text message. You will receive a confirmation message and no further texts will be sent. You may also contact us at <a href="mailto:info@trainwithstr.com">info@trainwithstr.com</a> to opt out.
+              <strong>Opt-out:</strong> You can opt out at any time by replying STOP to any text message. You will receive a confirmation message and no further texts will be sent. You may also contact us at <a href={`mailto:${contactEmail}`}>{contactEmail}</a> to opt out.
             </p>
             <p>
-              <strong>Help:</strong> Reply HELP to any text message for assistance, or contact us at <a href="mailto:info@trainwithstr.com">info@trainwithstr.com</a>.
+              <strong>Help:</strong> Reply HELP to any text message for assistance, or contact us at <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
             </p>
             <p>
               <strong>Message and data rates:</strong> Standard message and data rates from your wireless carrier may apply to messages you send and receive.
@@ -104,14 +107,14 @@ export default async function PrivacyPage() {
               Have questions about our privacy practices?
             </p>
             <Button asChild variant="secondary">
-              <Link href={maintenance ? "mailto:info@trainwithstr.com" : "/contact"}>
+              <Link href={maintenance ? `mailto:${contactEmail}` : "/contact"}>
                 Contact Us
               </Link>
             </Button>
           </div>
         </Section>
       </main>
-      {maintenance ? <MinimalFooter /> : <Footer />}
+      {maintenance ? <MinimalFooter contactEmail={contactEmail} /> : <Footer contactEmail={contactEmail} />}
     </>
   );
 }

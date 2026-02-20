@@ -1,7 +1,11 @@
 import { MapPin, Mail } from 'lucide-react';
 import { Container } from '@/components/layout/Container';
 
-export function FindUs() {
+interface FindUsProps {
+  contactEmail?: string;
+}
+
+export function FindUs({ contactEmail = 'info@trainwithstr.com' }: FindUsProps) {
   return (
     <section className="py-16 md:py-20 bg-iron-gray">
       <Container>
@@ -43,10 +47,10 @@ export function FindUs() {
               Email
             </h3>
             <a
-              href="mailto:info@trainwithstr.com"
+              href={`mailto:${contactEmail}`}
               className="text-concrete hover:text-str-gold transition-colors"
             >
-              info@trainwithstr.com
+              {contactEmail}
             </a>
           </div>
         </div>

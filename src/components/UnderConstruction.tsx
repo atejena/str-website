@@ -11,6 +11,7 @@ interface UnderConstructionProps {
   subtitle: string;
   showLogo: boolean;
   socialLinks?: SocialLinks;
+  contactEmail?: string;
 }
 
 // TikTok icon (lucide doesn't have one)
@@ -27,6 +28,7 @@ export default function UnderConstruction({
   subtitle,
   showLogo,
   socialLinks,
+  contactEmail = 'info@trainwithstr.com',
 }: UnderConstructionProps) {
   const hasSocials = socialLinks && Object.values(socialLinks).some(v => !!v);
   const [formState, setFormState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
@@ -64,7 +66,7 @@ export default function UnderConstruction({
       }
     } catch {
       setFormState('error');
-      setErrorMsg('Unable to send. Please email info@trainwithstr.com directly.');
+      setErrorMsg(`Unable to send. Please email ${contactEmail} directly.`);
     }
   }
 

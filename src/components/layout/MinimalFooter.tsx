@@ -2,7 +2,11 @@ import Link from 'next/link';
 import { Mail, MapPin } from 'lucide-react';
 import { Container } from './Container';
 
-export function MinimalFooter() {
+interface MinimalFooterProps {
+  contactEmail?: string;
+}
+
+export function MinimalFooter({ contactEmail = 'info@trainwithstr.com' }: MinimalFooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -12,11 +16,11 @@ export function MinimalFooter() {
           {/* Contact Only */}
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-6">
             <a
-              href="mailto:info@trainwithstr.com"
+              href={`mailto:${contactEmail}`}
               className="flex items-center gap-2 text-concrete hover:text-str-gold transition-colors text-sm"
             >
               <Mail className="w-4 h-4" />
-              info@trainwithstr.com
+              {contactEmail}
             </a>
             <a
               href="https://maps.google.com/?q=8+Eastman+St,+Suite+3,+Cranford,+NJ+07016"

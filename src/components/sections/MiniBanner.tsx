@@ -3,7 +3,11 @@ import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
 
-export function MiniBanner() {
+interface MiniBannerProps {
+  contactEmail?: string;
+}
+
+export function MiniBanner({ contactEmail = 'info@trainwithstr.com' }: MiniBannerProps) {
   return (
     <section className="py-12 md:py-16 bg-gradient-to-r from-str-gold via-str-gold to-[#fcc560]">
       <Container>
@@ -20,10 +24,10 @@ export function MiniBanner() {
             <div className="flex items-center gap-3">
               <Mail className="w-5 h-5 flex-shrink-0" />
               <a
-                href="mailto:info@trainwithstr.com"
+                href={`mailto:${contactEmail}`}
                 className="font-medium hover:underline"
               >
-                info@trainwithstr.com
+                {contactEmail}
               </a>
             </div>
           </div>

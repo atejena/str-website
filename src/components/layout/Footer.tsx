@@ -9,9 +9,10 @@ interface FooterProps {
     instagram?: string;
     facebook?: string;
   };
+  contactEmail?: string;
 }
 
-export function Footer({ socialLinks = {} }: FooterProps) {
+export function Footer({ socialLinks = {}, contactEmail = 'info@trainwithstr.com' }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   const navigationLinks = [
@@ -87,11 +88,11 @@ export function Footer({ socialLinks = {} }: FooterProps) {
               </li>
               <li>
                 <a
-                  href="mailto:info@trainwithstr.com"
+                  href={`mailto:${contactEmail}`}
                   className="flex items-center gap-3 text-concrete hover:text-str-gold transition-colors text-sm"
                 >
                   <Mail className="w-4 h-4 flex-shrink-0" />
-                  <span>info@trainwithstr.com</span>
+                  <span>{contactEmail}</span>
                 </a>
               </li>
             </ul>
