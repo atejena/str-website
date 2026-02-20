@@ -243,12 +243,19 @@ export default function ContactPageClient({ settings }: ContactPageClientProps) 
                         {...register('message')}
                       />
 
-                      {/* SMS Consent */}
-                      <p className="text-xs text-muted/70 leading-relaxed">
-                        By providing your phone number, you agree to receive text messages from STR - Strength Through Resilience regarding your inquiry and our services. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe, HELP for help. View our{' '}
-                        <Link href="/terms" className="text-str-gold underline hover:text-str-gold/80">Terms of Service</Link>{' '}and{' '}
-                        <Link href="/privacy" className="text-str-gold underline hover:text-str-gold/80">Privacy Policy</Link>.
-                      </p>
+                      {/* SMS Consent Checkbox */}
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id="sms_consent"
+                          className="mt-1 h-4 w-4 rounded border-border bg-surface text-str-gold focus:ring-str-gold/30 cursor-pointer accent-[#C8A951]"
+                        />
+                        <label htmlFor="sms_consent" className="text-xs text-muted/70 leading-relaxed cursor-pointer">
+                          I agree to receive text messages from <strong className="text-foreground">STR - Strength Through Resilience</strong> regarding my inquiry, account updates, service notifications, and promotional offers. Message frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out. Reply HELP for help. This consent is not a condition of purchase.{' '}
+                          <Link href="/privacy" className="text-str-gold underline hover:text-str-gold/80">Privacy Policy</Link>{' '}&amp;{' '}
+                          <Link href="/terms" className="text-str-gold underline hover:text-str-gold/80">Terms of Service</Link>.
+                        </label>
+                      </div>
 
                       <Button
                         type="submit"
