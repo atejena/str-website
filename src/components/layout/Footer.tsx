@@ -87,11 +87,11 @@ export function Footer({ socialLinks = {} }: FooterProps) {
               </li>
               <li>
                 <a
-                  href="mailto:spencer@trainwithstr.com"
+                  href="mailto:info@trainwithstr.com"
                   className="flex items-center gap-3 text-concrete hover:text-str-gold transition-colors text-sm"
                 >
                   <Mail className="w-4 h-4 flex-shrink-0" />
-                  <span>spencer@trainwithstr.com</span>
+                  <span>info@trainwithstr.com</span>
                 </a>
               </li>
             </ul>

@@ -78,10 +78,10 @@ export default async function PrivacyPage() {
               <strong>Message frequency:</strong> Message frequency varies based on your interactions and account activity. You may receive up to 10 messages per month.
             </p>
             <p>
-              <strong>Opt-out:</strong> You can opt out at any time by replying STOP to any text message. You will receive a confirmation message and no further texts will be sent. You may also contact us at <a href="mailto:spencer@trainwithstr.com">spencer@trainwithstr.com</a> to opt out.
+              <strong>Opt-out:</strong> You can opt out at any time by replying STOP to any text message. You will receive a confirmation message and no further texts will be sent. You may also contact us at <a href="mailto:info@trainwithstr.com">info@trainwithstr.com</a> to opt out.
             </p>
             <p>
-              <strong>Help:</strong> Reply HELP to any text message for assistance, or contact us at <a href="mailto:spencer@trainwithstr.com">spencer@trainwithstr.com</a>.
+              <strong>Help:</strong> Reply HELP to any text message for assistance, or contact us at <a href="mailto:info@trainwithstr.com">info@trainwithstr.com</a>.
             </p>
             <p>
               <strong>Message and data rates:</strong> Standard message and data rates from your wireless carrier may apply to messages you send and receive.
@@ -104,7 +104,7 @@ export default async function PrivacyPage() {
               Have questions about our privacy practices?
             </p>
             <Button asChild variant="secondary">
-              <Link href={maintenance ? "mailto:spencer@trainwithstr.com" : "/contact"}>
+              <Link href={maintenance ? "mailto:info@trainwithstr.com" : "/contact"}>
                 Contact Us
               </Link>
             </Button>

@@ -12,11 +12,11 @@ export function MinimalFooter() {
           {/* Contact Only */}
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-6">
             <a
-              href="mailto:spencer@trainwithstr.com"
+              href="mailto:info@trainwithstr.com"
               className="flex items-center gap-2 text-concrete hover:text-str-gold transition-colors text-sm"
             >
               <Mail className="w-4 h-4" />
-              spencer@trainwithstr.com
+              info@trainwithstr.com
             </a>
             <a
               href="https://maps.google.com/?q=8+Eastman+St,+Suite+3,+Cranford,+NJ+07016"

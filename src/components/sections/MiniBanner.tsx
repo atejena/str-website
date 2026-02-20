@@ -20,10 +20,10 @@ export function MiniBanner() {
             <div className="flex items-center gap-3">
               <Mail className="w-5 h-5 flex-shrink-0" />
               <a
-                href="mailto:spencer@trainwithstr.com"
+                href="mailto:info@trainwithstr.com"
                 className="font-medium hover:underline"
               >
-                spencer@trainwithstr.com
+                info@trainwithstr.com
               </a>
             </div>
           </div>

@@ -43,10 +43,10 @@ export function FindUs() {
               Email
             </h3>
             <a
-              href="mailto:spencer@trainwithstr.com"
+              href="mailto:info@trainwithstr.com"
               className="text-concrete hover:text-str-gold transition-colors"
             >
-              spencer@trainwithstr.com
+              info@trainwithstr.com
             </a>
           </div>
         </div>

@@ -81,7 +81,7 @@ export default async function TermsPage() {
             </p>
             <ul>
               <li>Replying <strong>STOP</strong> to any text message from STR</li>
-              <li>Emailing <a href="mailto:spencer@trainwithstr.com">spencer@trainwithstr.com</a> with the subject &quot;SMS Opt-Out&quot;</li>
+              <li>Emailing <a href="mailto:info@trainwithstr.com">info@trainwithstr.com</a> with the subject &quot;SMS Opt-Out&quot;</li>
               <li>Contacting us at 8 Eastman St, Suite 3, Cranford, NJ 07016</li>
             </ul>
             <p>
@@ -114,7 +114,7 @@ export default async function TermsPage() {
             </p>
             <ul>
               <li>Reply <strong>HELP</strong> to any text message</li>
-              <li>Email us at <a href="mailto:spencer@trainwithstr.com">spencer@trainwithstr.com</a></li>
+              <li>Email us at <a href="mailto:info@trainwithstr.com">info@trainwithstr.com</a></li>
               <li>Visit us at 8 Eastman St, Suite 3, Cranford, NJ 07016</li>
             </ul>
 
@@ -132,7 +132,7 @@ export default async function TermsPage() {
               Have questions about our terms of service?
             </p>
             <Button asChild variant="secondary">
-              <Link href={maintenance ? "mailto:spencer@trainwithstr.com" : "/contact"}>
+              <Link href={maintenance ? "mailto:info@trainwithstr.com" : "/contact"}>
                 Contact Us
               </Link>
             </Button>

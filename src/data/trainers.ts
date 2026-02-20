@@ -13,7 +13,7 @@ export const trainers: Trainer[] = [
     certifications: ['CSCS', 'USAW Level 2', 'CPR/AED'],
     experienceYears: 10,
     photo: 'https://images.unsplash.com/photo-1567013127542-490d757e51fc?w=400',
-    email: 'spencer@trainwithstr.com',
+    email: 'info@trainwithstr.com',
     instagram: 'trainwithstr',
     quote: 'Strength is not just physical—it is the resilience to keep going when things get hard.',
     featured: true,

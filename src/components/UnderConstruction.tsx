@@ -64,7 +64,7 @@ export default function UnderConstruction({
       }
     } catch {
       setFormState('error');
-      setErrorMsg('Unable to send. Please email spencer@trainwithstr.com directly.');
+      setErrorMsg('Unable to send. Please email info@trainwithstr.com directly.');
     }
   }
 

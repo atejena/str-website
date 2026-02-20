@@ -111,7 +111,7 @@ const jsonLd = {
   logo: 'https://trainwithstr.com/images/str-logo.webp',
   image: 'https://trainwithstr.com/images/og-image.jpg',
   telephone: '', // To be added
-  email: 'spencer@trainwithstr.com',
+  email: 'info@trainwithstr.com',
   address: {
     '@type': 'PostalAddress',
     streetAddress: '8 Eastman St, Suite 3',

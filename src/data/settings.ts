@@ -4,7 +4,7 @@ import type { SiteSettings } from '@/types';
 export const siteSettings: SiteSettings = {
   gymName: 'STR - Strength Through Resilience',
   tagline: 'Strength Through Resilience',
-  email: 'spencer@trainwithstr.com',
+  email: 'info@trainwithstr.com',
   phone: '', // PLACEHOLDER: Add phone number when available
   address: {
     street: '8 Eastman St, Suite 3',
