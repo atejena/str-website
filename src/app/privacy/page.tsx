@@ -3,9 +3,12 @@ import { ArrowLeft } from 'lucide-react';
 import { marked } from 'marked';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { MinimalHeader } from '@/components/layout/MinimalHeader';
+import { MinimalFooter } from '@/components/layout/MinimalFooter';
 import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { isMaintenanceMode } from '@/lib/maintenance';
 
 async function getPrivacyContent() {
   const supabase = await createServerSupabaseClient();
@@ -19,12 +22,15 @@ async function getPrivacyContent() {
 }
 
 export default async function PrivacyPage() {
-  const privacyMarkdown = await getPrivacyContent();
+  const [privacyMarkdown, maintenance] = await Promise.all([
+    getPrivacyContent(),
+    isMaintenanceMode(),
+  ]);
   const privacyHtml = marked(privacyMarkdown);
 
   return (
     <>
-      <Header />
+      {maintenance ? <MinimalHeader /> : <Header />}
       <main id="main-content">
         {/* Hero Section */}
         <Section background="default" className="pt-32 pb-12">
@@ -62,12 +68,14 @@ export default async function PrivacyPage() {
               Have questions about our privacy practices?
             </p>
             <Button asChild variant="secondary">
-              <Link href="/contact">Contact Us</Link>
+              <Link href={maintenance ? "mailto:spencer@trainwithstr.com" : "/contact"}>
+                Contact Us
+              </Link>
             </Button>
           </div>
         </Section>
       </main>
-      <Footer />
+      {maintenance ? <MinimalFooter /> : <Footer />}
     </>
   );
 }

@@ -3,9 +3,12 @@ import { ArrowLeft } from 'lucide-react';
 import { marked } from 'marked';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { MinimalHeader } from '@/components/layout/MinimalHeader';
+import { MinimalFooter } from '@/components/layout/MinimalFooter';
 import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { isMaintenanceMode } from '@/lib/maintenance';
 
 async function getTermsContent() {
   const supabase = await createServerSupabaseClient();
@@ -19,12 +22,15 @@ async function getTermsContent() {
 }
 
 export default async function TermsPage() {
-  const termsMarkdown = await getTermsContent();
+  const [termsMarkdown, maintenance] = await Promise.all([
+    getTermsContent(),
+    isMaintenanceMode(),
+  ]);
   const termsHtml = marked(termsMarkdown);
 
   return (
     <>
-      <Header />
+      {maintenance ? <MinimalHeader /> : <Header />}
       <main id="main-content">
         {/* Hero Section */}
         <Section background="default" className="pt-32 pb-12">
@@ -62,12 +68,14 @@ export default async function TermsPage() {
               Have questions about our terms of service?
             </p>
             <Button asChild variant="secondary">
-              <Link href="/contact">Contact Us</Link>
+              <Link href={maintenance ? "mailto:spencer@trainwithstr.com" : "/contact"}>
+                Contact Us
+              </Link>
             </Button>
           </div>
         </Section>
       </main>
-      <Footer />
+      {maintenance ? <MinimalFooter /> : <Footer />}
     </>
   );
 }
