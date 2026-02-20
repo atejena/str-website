@@ -121,6 +121,7 @@ export interface MembershipPlan {
   description: string;
   priceMonthly: number;
   priceAnnual?: number;
+  priceInterval?: string;
   setupFee?: number;
   contractMonths?: number;
   features: MembershipFeature[];

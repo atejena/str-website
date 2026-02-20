@@ -22,6 +22,7 @@ type PricingPlan = {
   slug: string
   description: string
   price_monthly: number
+  price_interval: string
   price_annual: number | null
   setup_fee: number
   features: Feature[]
@@ -46,6 +47,7 @@ export default function AdminPricingPage() {
     name: '',
     description: '',
     price_monthly: '',
+    price_interval: 'month',
     price_annual: '',
     setup_fee: '0',
     features: '',
@@ -80,6 +82,7 @@ export default function AdminPricingPage() {
       formDataObj.append('name', formData.name)
       formDataObj.append('description', formData.description)
       formDataObj.append('price_monthly', formData.price_monthly)
+      formDataObj.append('price_interval', formData.price_interval)
       formDataObj.append('price_annual', formData.price_annual)
       formDataObj.append('setup_fee', formData.setup_fee)
       formDataObj.append('features', formData.features)
@@ -119,6 +122,7 @@ export default function AdminPricingPage() {
       name: plan.name,
       description: plan.description || '',
       price_monthly: plan.price_monthly?.toString() || '0',
+      price_interval: plan.price_interval || 'month',
       price_annual: plan.price_annual?.toString() || '',
       setup_fee: plan.setup_fee?.toString() || '0',
       features: featuresText,
@@ -147,6 +151,7 @@ export default function AdminPricingPage() {
       name: '',
       description: '',
       price_monthly: '',
+      price_interval: 'month',
       price_annual: '',
       setup_fee: '0',
       features: '',
@@ -214,7 +219,7 @@ export default function AdminPricingPage() {
                   <span className="text-3xl font-bold text-str-gold">
                     ${plan.price_monthly}
                   </span>
-                  <span className="text-muted">/month</span>
+                  <span className="text-muted">/{plan.price_interval || 'month'}</span>
                 </div>
                 {plan.price_annual != null && plan.price_annual > 0 && (
                   <p className="text-sm text-muted mt-1">
@@ -287,9 +292,9 @@ export default function AdminPricingPage() {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Monthly Price *</label>
+              <label className="block text-sm font-medium mb-2">Price *</label>
               <Input
                 type="number"
                 step="0.01"
@@ -299,6 +304,58 @@ export default function AdminPricingPage() {
                 required
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Billing Interval</label>
+              {formData.price_interval === '_custom' ? (
+                <div className="flex gap-2">
+                  <Input
+                    value=""
+                    onChange={(e) => setFormData({ ...formData, price_interval: e.target.value })}
+                    placeholder="e.g. 6 months"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, price_interval: 'month' })}
+                    className="text-xs text-muted hover:text-foreground whitespace-nowrap"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : !['month', 'week', 'session', 'class', 'visit', 'year'].includes(formData.price_interval) && formData.price_interval !== '' ? (
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.price_interval}
+                    onChange={(e) => setFormData({ ...formData, price_interval: e.target.value })}
+                    placeholder="Custom interval"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, price_interval: 'month' })}
+                    className="text-xs text-muted hover:text-foreground whitespace-nowrap"
+                  >
+                    Preset
+                  </button>
+                </div>
+              ) : (
+                <select
+                  value={formData.price_interval}
+                  onChange={(e) => setFormData({ ...formData, price_interval: e.target.value })}
+                  className="w-full px-4 py-2 border border-border rounded-[2px] bg-background text-foreground h-10"
+                >
+                  <option value="month">Per Month</option>
+                  <option value="week">Per Week</option>
+                  <option value="session">Per Session</option>
+                  <option value="class">Per Class</option>
+                  <option value="visit">Per Visit</option>
+                  <option value="year">Per Year</option>
+                  <option value="_custom">Custom...</option>
+                </select>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Annual Price</label>
               <Input

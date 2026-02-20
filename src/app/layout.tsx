@@ -3,6 +3,7 @@ import { Oswald, Inter } from 'next/font/google';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/Toast';
 import GoHighLevelWidget from '@/components/GoHighLevelWidget';
+import MaintenanceGuard from '@/components/MaintenanceGuard';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 const oswald = Oswald({
@@ -151,7 +152,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch GoHighLevel widget ID from site_settings
+  // Fetch settings from site_settings
   const supabase = await createServerSupabaseClient();
   const { data: integrationSettings } = await supabase
     .from('site_settings')
@@ -161,6 +162,39 @@ export default async function RootLayout({
 
   const ghlWidgetId =
     (integrationSettings?.value as Record<string, string> | null)?.gohighlevel_widget_id || '';
+
+  // Fetch maintenance mode settings
+  const { data: maintenanceRow } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'maintenance_mode')
+    .single();
+
+  const maintenanceValue = maintenanceRow?.value as Record<string, unknown> | null;
+  const maintenanceSettings = {
+    enabled: (maintenanceValue?.enabled as boolean) ?? false,
+    title: (maintenanceValue?.title as string) || 'Coming Soon',
+    subtitle: (maintenanceValue?.subtitle as string) || '',
+    showLogo: (maintenanceValue?.show_logo as boolean) ?? true,
+  };
+
+  // Fetch social links for under construction page
+  const { data: socialRow } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'social_links')
+    .single();
+  const socialValue = socialRow?.value as Record<string, string> | null;
+  const socialLinks = {
+    instagram: socialValue?.instagram || '',
+    facebook: socialValue?.facebook || '',
+    youtube: socialValue?.youtube || '',
+    tiktok: socialValue?.tiktok || '',
+  };
+
+  // Check if user has a session (for preview mode)
+  const { data: { user } } = await supabase.auth.getUser();
+  const hasSession = !!user;
 
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
@@ -177,7 +211,13 @@ export default async function RootLayout({
           <a href="#main-content" className="skip-link">
             Skip to main content
           </a>
-          {children}
+          <MaintenanceGuard
+            maintenance={maintenanceSettings}
+            socialLinks={socialLinks}
+            hasSession={hasSession}
+          >
+            {children}
+          </MaintenanceGuard>
         </ToastProvider>
         {ghlWidgetId && <GoHighLevelWidget widgetId={ghlWidgetId} />}
       </body>

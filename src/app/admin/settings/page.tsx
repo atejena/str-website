@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Settings as SettingsIcon, RefreshCw } from 'lucide-react'
+import { Save, Settings as SettingsIcon, RefreshCw, Construction, ExternalLink } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -97,6 +97,99 @@ export default function AdminSettingsPage() {
           {saving ? 'Saving...' : 'Save All Changes'}
         </Button>
       </div>
+
+      {/* Site Mode / Maintenance */}
+      <Card>
+        <CardContent className="p-6">
+          {settings.maintenance_enabled && (
+            <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-md">
+              <p className="text-yellow-400 font-bold text-sm">
+                ⚠️ Site is currently showing Under Construction page to visitors
+              </p>
+            </div>
+          )}
+          <h2 className="text-xl font-display font-bold text-foreground mb-6 flex items-center gap-2">
+            <Construction className="w-5 h-5" />
+            Site Mode
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-sm font-medium">Under Construction Mode</label>
+                <p className="text-xs text-muted mt-0.5">When enabled, visitors will see a &quot;Coming Soon&quot; page instead of the website.</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings.maintenance_enabled === true}
+                onClick={() => updateSetting('maintenance_enabled', !settings.maintenance_enabled)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                  settings.maintenance_enabled ? 'bg-str-gold' : 'bg-border'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.maintenance_enabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {settings.maintenance_enabled && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Page Title</label>
+                  <Input
+                    value={settings.maintenance_title || ''}
+                    onChange={(e) => updateSetting('maintenance_title', e.target.value)}
+                    placeholder="Coming Soon"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Subtitle / Message</label>
+                  <Textarea
+                    value={settings.maintenance_subtitle || ''}
+                    onChange={(e) => updateSetting('maintenance_subtitle', e.target.value)}
+                    rows={3}
+                    placeholder="We're working on something amazing. Stay tuned!"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium">Show Logo</label>
+                    <p className="text-xs text-muted mt-0.5">Display the STR logo on the construction page.</p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={settings.maintenance_show_logo === true}
+                    onClick={() => updateSetting('maintenance_show_logo', !settings.maintenance_show_logo)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                      settings.maintenance_show_logo ? 'bg-str-gold' : 'bg-border'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        settings.maintenance_show_logo ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                <div className="pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => window.open('/?preview=true', '_blank')}
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Preview Site
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Gym Info */}
       <Card>

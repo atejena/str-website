@@ -242,6 +242,7 @@ export async function createPricingPlan(formData: FormData) {
     price_monthly: parseFloat(formData.get('price_monthly') as string) || 0,
     price_annual: parseFloat(formData.get('price_annual') as string) || null,
     setup_fee: parseFloat(formData.get('setup_fee') as string) || 0,
+    price_interval: formData.get('price_interval') as string || 'month',
     features,
     highlighted: formData.get('highlighted') === 'true',
     cta_text: formData.get('cta_text') as string || 'Get Started',
@@ -268,6 +269,7 @@ export async function updatePricingPlan(id: string, formData: FormData) {
     price_monthly: parseFloat(formData.get('price_monthly') as string) || 0,
     price_annual: parseFloat(formData.get('price_annual') as string) || null,
     setup_fee: parseFloat(formData.get('setup_fee') as string) || 0,
+    price_interval: formData.get('price_interval') as string || 'month',
     features,
     highlighted: formData.get('highlighted') === 'true',
     cta_text: formData.get('cta_text') as string || 'Get Started',
@@ -807,6 +809,11 @@ export async function getSettings() {
       settings.terms_content = value || ''
     } else if (key === 'privacy_content') {
       settings.privacy_content = value || ''
+    } else if (key === 'maintenance_mode') {
+      settings.maintenance_enabled = value?.enabled ?? false
+      settings.maintenance_title = value?.title || 'Coming Soon'
+      settings.maintenance_subtitle = value?.subtitle || ''
+      settings.maintenance_show_logo = value?.show_logo ?? true
     } else {
       // Keep other settings as-is (instagram_handle, google_place_id, etc.)
       settings[key] = value
@@ -911,6 +918,18 @@ export async function updateSettings(settings: Record<string, any>) {
     })
   }
   
+  // Maintenance Mode
+  updates.push({
+    key: 'maintenance_mode',
+    value: {
+      enabled: settings.maintenance_enabled === true || settings.maintenance_enabled === 'true',
+      title: settings.maintenance_title || 'Coming Soon',
+      subtitle: settings.maintenance_subtitle || '',
+      show_logo: settings.maintenance_show_logo === true || settings.maintenance_show_logo === 'true',
+    },
+    updated_at: new Date().toISOString(),
+  })
+
   // Other standalone settings (instagram_handle, google_place_id, etc.)
   const standaloneKeys = ['instagram_handle', 'google_place_id', 'instagram_feed_embed', 'sync_secret_key']
   standaloneKeys.forEach(key => {

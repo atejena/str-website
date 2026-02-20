@@ -26,6 +26,7 @@ export default async function PricingPage() {
     tagline: (p.tagline as string) || '',
     description: (p.description as string) || '',
     priceMonthly: (p.price_monthly as number) || 0,
+    priceInterval: (p.price_interval as string) || 'month',
     priceAnnual: p.price_annual as number | undefined,
     setupFee: p.setup_fee as number | undefined,
     contractMonths: p.contract_months as number | undefined,

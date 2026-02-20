@@ -102,7 +102,7 @@ export default function PricingPageClient({ plans, faqs }: PricingPageClientProp
                         <span className="text-5xl font-display font-bold text-str-gold">
                           ${plan.priceMonthly}
                         </span>
-                        <span className="text-muted">/month</span>
+                        <span className="text-muted">/{plan.priceInterval || 'month'}</span>
                       </div>
                       {plan.setupFee != null && plan.setupFee > 0 && (
                         <p className="text-sm text-muted mt-2">
