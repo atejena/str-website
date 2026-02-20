@@ -135,6 +135,9 @@ export default function UnderConstruction({
               </div>
             ) : (
               <form onSubmit={handleFormSubmit} className="space-y-4 text-left">
+                <p className="text-center font-display text-sm font-bold uppercase tracking-widest text-str-gold mb-1">
+                  STR - Strength Through Resilience
+                </p>
                 <p className="text-center text-gray-400 text-sm mb-4">
                   Interested? Drop us a message and we&apos;ll keep you posted.
                 </p>

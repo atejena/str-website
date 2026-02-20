@@ -46,6 +46,9 @@ export function GetStartedForm({ jotform, ghlFormUrl }: GetStartedFormProps = {}
       <Container>
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
+            <p className="font-display text-sm font-bold uppercase tracking-widest text-str-gold mb-3">
+              STR - Strength Through Resilience
+            </p>
             <h2 className="font-display text-h2 font-semibold uppercase text-white mb-4 tracking-wider">
               Get Started
             </h2>
