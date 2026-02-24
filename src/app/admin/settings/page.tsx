@@ -629,16 +629,27 @@ export default function AdminSettingsPage() {
           </h2>
           <div className="space-y-4">
             <div>
+              <label className="block text-sm font-medium mb-2">Last Updated Date</label>
+              <Input
+                value={settings.terms_last_updated || ''}
+                onChange={(e) => updateSetting('terms_last_updated', e.target.value)}
+                placeholder="e.g. February 24, 2026"
+              />
+              <p className="text-xs text-muted mt-1">
+                Displayed at the top of the Terms page.
+              </p>
+            </div>
+            <div>
               <label className="block text-sm font-medium mb-2">Terms Content (Markdown)</label>
               <Textarea
                 value={settings.terms_content || ''}
                 onChange={(e) => updateSetting('terms_content', e.target.value)}
                 rows={20}
-                placeholder="# Terms of Service&#10;&#10;## 1. Acceptance of Terms&#10;&#10;Your terms content here..."
+                placeholder="# Terms of Service&#10;&#10;## 1. Acceptance of Terms&#10;&#10;Your terms content here...&#10;&#10;## SMS/Text Messaging Terms&#10;&#10;Include your A2P/TCPA compliance text here..."
                 className="font-mono text-sm"
               />
               <p className="text-xs text-muted mt-2">
-                Use Markdown formatting. This content will be displayed on the /terms page.
+                Use Markdown formatting. This is the <strong>entire</strong> Terms page content — include all sections (general terms, SMS/text messaging terms, etc.).
               </p>
             </div>
             
@@ -669,16 +680,27 @@ export default function AdminSettingsPage() {
           </h2>
           <div className="space-y-4">
             <div>
+              <label className="block text-sm font-medium mb-2">Last Updated Date</label>
+              <Input
+                value={settings.privacy_last_updated || ''}
+                onChange={(e) => updateSetting('privacy_last_updated', e.target.value)}
+                placeholder="e.g. February 24, 2026"
+              />
+              <p className="text-xs text-muted mt-1">
+                Displayed at the top of the Privacy Policy page.
+              </p>
+            </div>
+            <div>
               <label className="block text-sm font-medium mb-2">Privacy Policy Content (Markdown)</label>
               <Textarea
                 value={settings.privacy_content || ''}
                 onChange={(e) => updateSetting('privacy_content', e.target.value)}
                 rows={20}
-                placeholder="# Privacy Policy&#10;&#10;## 1. Information We Collect&#10;&#10;Your privacy policy content here..."
+                placeholder="# Privacy Policy&#10;&#10;## 1. Information We Collect&#10;&#10;Your privacy policy content here...&#10;&#10;## SMS/Text Messaging Opt-In & Data&#10;&#10;Include your SMS privacy text here..."
                 className="font-mono text-sm"
               />
               <p className="text-xs text-muted mt-2">
-                Use Markdown formatting. This content will be displayed on the /privacy page.
+                Use Markdown formatting. This is the <strong>entire</strong> Privacy Policy content — include all sections (data collection, SMS opt-in, mobile info sharing, etc.).
               </p>
             </div>
           </div>

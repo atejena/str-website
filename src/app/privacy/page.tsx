@@ -22,9 +22,21 @@ async function getPrivacyContent() {
   return data?.value as string || '';
 }
 
+async function getPrivacyLastUpdated() {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'privacy_last_updated')
+    .single();
+  
+  return data?.value as string || '';
+}
+
 export default async function PrivacyPage() {
-  const [privacyMarkdown, maintenance, gymInfo] = await Promise.all([
+  const [privacyMarkdown, privacyLastUpdated, maintenance, gymInfo] = await Promise.all([
     getPrivacyContent(),
+    getPrivacyLastUpdated(),
     isMaintenanceMode(),
     getGymInfo(),
   ]);
@@ -50,53 +62,24 @@ export default async function PrivacyPage() {
             <h1 className="text-display-hero font-display font-bold text-foreground mb-6">
               PRIVACY <span className="text-str-gold">POLICY</span>
             </h1>
-            <p className="text-muted">
-              Last updated: January 1, 2025
-            </p>
+            {privacyLastUpdated && (
+              <p className="text-muted">
+                Last updated: {privacyLastUpdated}
+              </p>
+            )}
           </div>
         </Section>
 
-        {/* Content */}
+        {/* Content — fully DB-driven */}
         <Section background="surface">
           <div
             className="max-w-3xl mx-auto prose prose-invert prose-headings:font-display prose-headings:text-foreground prose-p:text-muted prose-li:text-muted prose-strong:text-foreground"
           >
-            {privacyHtml && <div dangerouslySetInnerHTML={{ __html: privacyHtml }} />}
-
-            {/* SMS/Text Messaging Privacy Section (A2P Compliance) */}
-            <h2 id="sms-opt-in">SMS/Text Messaging Opt-In &amp; Data</h2>
-            <p>
-              When you provide your phone number through our website forms (Get Started, Contact Us) and check the SMS consent box, you opt in to receive text messages from STR - Strength Through Resilience. We collect your phone number solely for the following purposes:
-            </p>
-            <ul>
-              <li>Responding to your inquiries and service requests</li>
-              <li>Sending appointment reminders and scheduling confirmations</li>
-              <li>Providing account updates and membership notifications</li>
-              <li>Delivering promotional offers and gym updates (only if you opt in)</li>
-            </ul>
-            <p>
-              <strong>Opt-in method:</strong> By checking the SMS consent checkbox on our website forms, you expressly agree to receive text messages. This consent is not a condition of purchasing any goods or services.
-            </p>
-            <p>
-              <strong>Message frequency:</strong> Message frequency varies based on your interactions and account activity. You may receive up to 10 messages per month.
-            </p>
-            <p>
-              <strong>Opt-out:</strong> You can opt out at any time by replying STOP to any text message. You will receive a confirmation message and no further texts will be sent. You may also contact us at <a href={`mailto:${contactEmail}`}>{contactEmail}</a> to opt out.
-            </p>
-            <p>
-              <strong>Help:</strong> Reply HELP to any text message for assistance, or contact us at <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
-            </p>
-            <p>
-              <strong>Message and data rates:</strong> Standard message and data rates from your wireless carrier may apply to messages you send and receive.
-            </p>
-
-            <h2 id="mobile-info-sharing">Mobile Information Sharing</h2>
-            <p>
-              We do not sell, rent, lease, or share your mobile phone number or any personal information collected via SMS/text messaging with third parties or affiliates for marketing or promotional purposes. Your phone number and opt-in data are used solely by STR - Strength Through Resilience for the purposes described in this Privacy Policy.
-            </p>
-            <p>
-              We may share your information only with service providers who assist in delivering text messages (e.g., our messaging platform), and they are contractually obligated to protect your data and use it only for the purpose of providing their services to us.
-            </p>
+            {privacyHtml ? (
+              <div dangerouslySetInnerHTML={{ __html: privacyHtml }} />
+            ) : (
+              <p className="text-muted italic">Privacy policy content has not been added yet. Please update via the admin settings.</p>
+            )}
           </div>
         </Section>
 
