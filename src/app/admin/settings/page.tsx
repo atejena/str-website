@@ -529,9 +529,54 @@ export default function AdminSettingsPage() {
             <RefreshCw className="w-5 h-5" />
             Auto-Sync
           </h2>
-          <p className="text-sm text-muted mb-6">
-            Sync Google Reviews and Instagram posts to your website. Requires <code className="bg-surface px-1 py-0.5 rounded text-xs">SYNC_SECRET_KEY</code>, <code className="bg-surface px-1 py-0.5 rounded text-xs">GOOGLE_PLACES_API_KEY</code>, and optionally <code className="bg-surface px-1 py-0.5 rounded text-xs">INSTAGRAM_ACCESS_TOKEN</code> environment variables on Vercel.
+          <p className="text-sm text-muted mb-4">
+            Sync Google Reviews and Instagram posts to your website. These keys must be set as environment variables on Vercel.
           </p>
+
+          {/* Setup Instructions */}
+          <div className="bg-surface border border-border rounded-md p-4 mb-6 space-y-4 text-sm">
+            <h3 className="font-bold text-foreground">Setup Instructions</h3>
+
+            <div>
+              <p className="font-semibold text-foreground mb-1">1. SYNC_SECRET_KEY</p>
+              <p className="text-muted text-xs leading-relaxed">
+                This is a password you create yourself — any random string works. It protects the sync API endpoints from unauthorized access.
+                Generate one at <a href="https://randomkeygen.com" target="_blank" rel="noopener noreferrer" className="text-str-gold underline hover:text-str-gold/80">randomkeygen.com</a> (use a 256-bit key). Set it in Vercel → Project Settings → Environment Variables as <code className="bg-str-black px-1.5 py-0.5 rounded text-xs">SYNC_SECRET_KEY</code>.
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-foreground mb-1">2. GOOGLE_PLACES_API_KEY</p>
+              <p className="text-muted text-xs leading-relaxed">
+                Required for syncing Google Reviews. To get one:<br />
+                ① Go to <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer" className="text-str-gold underline hover:text-str-gold/80">Google Cloud Console</a><br />
+                ② Create a project (or select an existing one)<br />
+                ③ Go to <strong>APIs &amp; Services → Library</strong> and enable <strong>&quot;Places API (New)&quot;</strong><br />
+                ④ Go to <strong>APIs &amp; Services → Credentials</strong> → Create Credentials → <strong>API Key</strong><br />
+                ⑤ Copy the key and set it in Vercel as <code className="bg-str-black px-1.5 py-0.5 rounded text-xs">GOOGLE_PLACES_API_KEY</code><br />
+                ⑥ (Recommended) Restrict the key to only the Places API under &quot;API restrictions&quot;
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-foreground mb-1">3. INSTAGRAM_ACCESS_TOKEN <span className="text-muted font-normal">(optional)</span></p>
+              <p className="text-muted text-xs leading-relaxed">
+                Required for syncing Instagram posts. To get one:<br />
+                ① Go to <a href="https://developers.facebook.com" target="_blank" rel="noopener noreferrer" className="text-str-gold underline hover:text-str-gold/80">Meta for Developers</a> and create an app (type: Business)<br />
+                ② Add the <strong>Instagram Graph API</strong> product<br />
+                ③ Go to <strong>Tools → Graph API Explorer</strong><br />
+                ④ Select your app, then request these permissions: <code className="bg-str-black px-1.5 py-0.5 rounded text-xs">instagram_basic</code>, <code className="bg-str-black px-1.5 py-0.5 rounded text-xs">pages_show_list</code><br />
+                ⑤ Click &quot;Generate Access Token&quot; and connect your Instagram Business/Creator account<br />
+                ⑥ Exchange the short-lived token for a <strong>long-lived token</strong> (lasts 60 days) via the API<br />
+                ⑦ Set it in Vercel as <code className="bg-str-black px-1.5 py-0.5 rounded text-xs">INSTAGRAM_ACCESS_TOKEN</code>
+              </p>
+            </div>
+
+            <p className="text-muted text-xs border-t border-border pt-3">
+              <strong>Where to set env vars:</strong> Go to <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="text-str-gold underline hover:text-str-gold/80">Vercel</a> → Your Project → Settings → Environment Variables. Add each key for the <strong>Production</strong> environment, then redeploy.
+            </p>
+          </div>
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Sync Secret Key (for testing from browser)</label>
