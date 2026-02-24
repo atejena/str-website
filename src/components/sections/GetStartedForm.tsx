@@ -140,19 +140,31 @@ export function GetStartedForm({ jotform, ghlFormUrl }: GetStartedFormProps = {}
                   />
                 </div>
 
-                {/* SMS Consent Checkbox */}
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    id="sms_consent"
-                    name="sms_consent"
-                    className="mt-1 h-4 w-4 rounded border-concrete/40 bg-str-black text-str-gold focus:ring-str-gold/30 cursor-pointer accent-[#C8A951]"
-                  />
-                  <label htmlFor="sms_consent" className="text-xs text-concrete/70 leading-relaxed cursor-pointer">
-                    I agree to receive text messages from <strong className="text-concrete">STR Fitness LLC</strong> regarding my inquiry, account updates, service notifications, and promotional offers. Message frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out. Reply HELP for help. This consent is not a condition of purchase.{' '}
-                    <a href="/privacy" className="text-str-gold underline hover:text-str-gold/80">Privacy Policy</a>{' '}&amp;{' '}
-                    <a href="/terms" className="text-str-gold underline hover:text-str-gold/80">Terms of Service</a>.
-                  </label>
+                {/* SMS Consent Checkboxes — A2P/TCPA Compliant (non-marketing + marketing) */}
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="sms_consent_transactional"
+                      name="sms_consent_transactional"
+                      className="mt-1 h-4 w-4 rounded border-concrete/40 bg-str-black text-str-gold focus:ring-str-gold/30 cursor-pointer accent-[#C8A951]"
+                    />
+                    <label htmlFor="sms_consent_transactional" className="text-xs text-concrete/70 leading-relaxed cursor-pointer">
+                      By checking this box, I consent to receive non-marketing text messages from <strong className="text-concrete">STR Fitness LLC we are DBA as STR</strong>. Message frequency varies, message &amp; data rates may apply. Text HELP for assistance, reply STOP to opt out.
+                    </label>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="sms_consent_marketing"
+                      name="sms_consent_marketing"
+                      className="mt-1 h-4 w-4 rounded border-concrete/40 bg-str-black text-str-gold focus:ring-str-gold/30 cursor-pointer accent-[#C8A951]"
+                    />
+                    <label htmlFor="sms_consent_marketing" className="text-xs text-concrete/70 leading-relaxed cursor-pointer">
+                      By checking this box, I consent to receive marketing and promotional messages including special offers, discounts, new product updates among others from <strong className="text-concrete">STR Fitness LLC we are DBA as STR</strong> at the phone number provided. Frequency may vary. Message &amp; data rates may apply. Text HELP for assistance, reply STOP to opt out.
+                    </label>
+                  </div>
                 </div>
 
                 <input type="hidden" name="subject" value="New Get Started Inquiry" />

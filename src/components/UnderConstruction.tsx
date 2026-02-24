@@ -51,7 +51,8 @@ export default function UnderConstruction({
           email: formData.get('email'),
           phone: formData.get('phone'),
           message: formData.get('message'),
-          sms_consent: formData.get('sms_consent') === 'on',
+          sms_consent_transactional: formData.get('sms_consent_transactional') === 'on',
+          sms_consent_marketing: formData.get('sms_consent_marketing') === 'on',
           subject: 'Coming Soon Page Inquiry',
           source_page: 'coming-soon',
         }),
@@ -173,19 +174,31 @@ export default function UnderConstruction({
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded text-white placeholder-gray-500 text-sm focus:outline-none focus:border-str-gold/50 transition-colors resize-none"
                 />
 
-                {/* SMS Consent Checkbox — A2P Compliant */}
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    id="sms_consent_cs"
-                    name="sms_consent"
-                    className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent cursor-pointer accent-[#C8A951] flex-shrink-0"
-                  />
-                  <label htmlFor="sms_consent_cs" className="text-[11px] text-gray-500 leading-relaxed cursor-pointer">
-                    I agree to receive text messages from <strong className="text-gray-400">STR Fitness LLC</strong> regarding my inquiry, account updates, service notifications, and promotional offers. Message frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out. Reply HELP for help. Consent is not a condition of purchase.{' '}
-                    <Link href="/privacy" className="text-str-gold/70 underline hover:text-str-gold">Privacy Policy</Link>{' '}&amp;{' '}
-                    <Link href="/terms" className="text-str-gold/70 underline hover:text-str-gold">Terms of Service</Link>.
-                  </label>
+                {/* SMS Consent Checkboxes — A2P/TCPA Compliant (non-marketing + marketing) */}
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="sms_consent_transactional_cs"
+                      name="sms_consent_transactional"
+                      className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent cursor-pointer accent-[#C8A951] flex-shrink-0"
+                    />
+                    <label htmlFor="sms_consent_transactional_cs" className="text-[11px] text-gray-500 leading-relaxed cursor-pointer">
+                      By checking this box, I consent to receive non-marketing text messages from <strong className="text-gray-400">STR Fitness LLC we are DBA as STR</strong>. Message frequency varies, message &amp; data rates may apply. Text HELP for assistance, reply STOP to opt out.
+                    </label>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="sms_consent_marketing_cs"
+                      name="sms_consent_marketing"
+                      className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent cursor-pointer accent-[#C8A951] flex-shrink-0"
+                    />
+                    <label htmlFor="sms_consent_marketing_cs" className="text-[11px] text-gray-500 leading-relaxed cursor-pointer">
+                      By checking this box, I consent to receive marketing and promotional messages including special offers, discounts, new product updates among others from <strong className="text-gray-400">STR Fitness LLC we are DBA as STR</strong> at the phone number provided. Frequency may vary. Message &amp; data rates may apply. Text HELP for assistance, reply STOP to opt out.
+                    </label>
+                  </div>
                 </div>
 
                 {errorMsg && (

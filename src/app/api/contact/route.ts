@@ -11,7 +11,8 @@ export async function POST(request: NextRequest) {
     const message = body.message || '';
     const subject = body.subject || null;
     const sourcePage = body.source_page || null;
-    const smsConsent = body.sms_consent || false;
+    const smsConsentTransactional = body.sms_consent_transactional || false;
+    const smsConsentMarketing = body.sms_consent_marketing || false;
 
     // Validate required fields
     if (!name || !email) {
@@ -44,13 +45,13 @@ export async function POST(request: NextRequest) {
       message,
       subject,
       source_page: sourcePage,
-      sms_consent: smsConsent,
+      sms_consent_transactional: smsConsentTransactional,
+      sms_consent_marketing: smsConsentMarketing,
     });
 
     if (error) {
       console.error('Contact form submission error:', error);
-      // Still return success to user even if DB insert fails
-      // (column may not exist yet for sms_consent — try without it)
+      // Fallback: try without consent columns if they don't exist yet
       if (error.message?.includes('sms_consent')) {
         const { error: retryError } = await supabase.from('contact_submissions').insert({
           name,

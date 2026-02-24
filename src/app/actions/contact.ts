@@ -11,6 +11,8 @@ export async function submitContactForm(formData: FormData) {
     const message = formData.get('message') as string;
     const subject = formData.get('subject') as string | null;
     const source_page = formData.get('source_page') as string | null;
+    const sms_consent_transactional = formData.get('sms_consent_transactional') === 'on';
+    const sms_consent_marketing = formData.get('sms_consent_marketing') === 'on';
 
     // Validate required fields
     if (!name || !email || !message) {
@@ -38,6 +40,8 @@ export async function submitContactForm(formData: FormData) {
       message,
       subject: subject || null,
       source_page: source_page || null,
+      sms_consent_transactional,
+      sms_consent_marketing,
     });
 
     if (error) {
