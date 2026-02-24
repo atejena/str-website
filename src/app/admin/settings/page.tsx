@@ -331,19 +331,17 @@ export default function AdminSettingsPage() {
           <h2 className="text-xl font-display font-bold text-foreground mb-6">
             Business Hours
           </h2>
+          <p className="text-xs text-muted mb-4">
+            Enter hours as free text — supports multiple time slots per day. Leave blank to hide a day.
+          </p>
           <div className="space-y-3">
             {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
-              <div key={day} className="grid grid-cols-3 gap-4 items-center">
+              <div key={day} className="grid grid-cols-[120px_1fr] gap-4 items-center">
                 <div className="capitalize font-medium text-foreground">{day}</div>
                 <Input
-                  value={(settings[`hours_${day}_open`] as string) || ''}
-                  onChange={(e) => updateSetting(`hours_${day}_open`, e.target.value)}
-                  placeholder="9:00 AM"
-                />
-                <Input
-                  value={(settings[`hours_${day}_close`] as string) || ''}
-                  onChange={(e) => updateSetting(`hours_${day}_close`, e.target.value)}
-                  placeholder="8:00 PM"
+                  value={(settings[`hours_${day}`] as string) || ''}
+                  onChange={(e) => updateSetting(`hours_${day}`, e.target.value)}
+                  placeholder="e.g. 5AM - 12PM, 4PM - 9PM"
                 />
               </div>
             ))}

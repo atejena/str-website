@@ -50,12 +50,7 @@ interface SiteSettingsData {
       zip?: string;
     };
   };
-  business_hours?: Array<{
-    day: string;
-    open: string;
-    close: string;
-    closed: boolean;
-  }>;
+  business_hours?: Record<string, string>;
   social_links?: {
     instagram?: string;
     facebook?: string;
@@ -76,7 +71,26 @@ export default function ContactPageClient({ settings }: ContactPageClientProps) 
 
   const gymInfo = settings.gym_info || {};
   const address = gymInfo.address || {};
-  const businessHours = settings.business_hours || [];
+  const businessHoursRaw = settings.business_hours || {};
+  const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const businessHours = dayOrder
+    .filter(day => {
+      const val = businessHoursRaw[day];
+      // Support new format (string) and legacy format ({ open, close })
+      if (typeof val === 'string') return val.trim() !== '';
+      if (val && typeof val === 'object') {
+        const obj = val as unknown as { open?: string; close?: string };
+        return !!(obj.open || obj.close);
+      }
+      return false;
+    })
+    .map(day => {
+      const val = businessHoursRaw[day];
+      const label = day.charAt(0).toUpperCase() + day.slice(1);
+      if (typeof val === 'string') return { day: label, hours: val };
+      const obj = val as unknown as { open?: string; close?: string };
+      return { day: label, hours: `${obj?.open || ''} - ${obj?.close || ''}` };
+    });
   const socialLinks = settings.social_links || {};
   const integrations = settings.integrations || {};
   
@@ -387,12 +401,10 @@ export default function ContactPageClient({ settings }: ContactPageClientProps) 
                       <div className="flex-grow">
                         <h3 className="font-display font-bold text-foreground mb-3">Hours</h3>
                         <div className="space-y-1 text-sm">
-                          {businessHours.map((hours) => (
-                            <div key={hours.day} className="flex justify-between">
-                              <span className="text-muted">{hours.day}</span>
-                              <span className="text-foreground">
-                                {hours.closed ? 'Closed' : `${hours.open} - ${hours.close}`}
-                              </span>
+                          {businessHours.map((entry) => (
+                            <div key={entry.day} className="flex justify-between">
+                              <span className="text-muted">{entry.day}</span>
+                              <span className="text-foreground">{entry.hours}</span>
                             </div>
                           ))}
                         </div>

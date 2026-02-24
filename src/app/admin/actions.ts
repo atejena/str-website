@@ -784,11 +784,19 @@ export async function getSettings() {
       settings.address_state = (address?.state as string) || ''
       settings.address_zip = (address?.zip as string) || ''
     } else if (key === 'business_hours' && typeof value === 'object' && value !== null) {
-      const hours = value as Record<string, Record<string, string>>
+      const hours = value as Record<string, string | Record<string, string>>
       const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
       days.forEach(day => {
-        settings[`hours_${day}_open`] = hours[day]?.open || ''
-        settings[`hours_${day}_close`] = hours[day]?.close || ''
+        const dayVal = hours[day]
+        if (typeof dayVal === 'string') {
+          // New format: free text per day
+          settings[`hours_${day}`] = dayVal
+        } else if (dayVal && typeof dayVal === 'object') {
+          // Legacy format: { open, close } → convert to free text
+          const open = (dayVal as Record<string, string>).open || ''
+          const close = (dayVal as Record<string, string>).close || ''
+          settings[`hours_${day}`] = open && close ? `${open} - ${close}` : ''
+        }
       })
     } else if (key === 'social_links' && typeof value === 'object' && value !== null) {
       const social = value as Record<string, string>
@@ -860,14 +868,11 @@ export async function updateSettings(settings: Record<string, any>) {
     updated_at: new Date().toISOString(),
   })
   
-  // Business Hours
+  // Business Hours (free text per day)
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-  const businessHours: Record<string, { open: string; close: string }> = {}
+  const businessHours: Record<string, string> = {}
   days.forEach(day => {
-    businessHours[day] = {
-      open: (settings[`hours_${day}_open`] as string) || '',
-      close: (settings[`hours_${day}_close`] as string) || '',
-    }
+    businessHours[day] = (settings[`hours_${day}`] as string) || ''
   })
   updates.push({
     key: 'business_hours',
