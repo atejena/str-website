@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/layout/Container';
 import { submitContactForm } from '@/app/actions/contact';
@@ -41,6 +41,20 @@ export function GetStartedForm({ jotform, ghlFormUrl }: GetStartedFormProps = {}
   const useGHL = !!ghlFormUrl;
   const useJotform = !useGHL && jotform?.enabled === true && !!jotform.embed_url;
 
+  // Load GHL form embed script for auto-resize
+  useEffect(() => {
+    if (!useGHL) return;
+    const existingScript = document.querySelector('script[src*="form_embed.js"]');
+    if (existingScript) return;
+    const script = document.createElement('script');
+    script.src = 'https://link.msgsndr.com/js/form_embed.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      script.remove();
+    };
+  }, [useGHL]);
+
   return (
     <section id="get-started" className="py-16 md:py-24 bg-str-black scroll-mt-20">
       <Container>
@@ -58,13 +72,14 @@ export function GetStartedForm({ jotform, ghlFormUrl }: GetStartedFormProps = {}
           </div>
 
           {useGHL ? (
-            /* GoHighLevel Embed */
+            /* GoHighLevel Embed — auto-resizes via form_embed.js */
             <div className="bg-iron-gray rounded-md p-2 md:p-4">
               <iframe
                 src={ghlFormUrl!}
-                style={{ width: '100%', minHeight: '600px', border: 'none' }}
+                style={{ width: '100%', border: 'none', overflow: 'hidden' }}
                 title="Get Started Form"
-                allowFullScreen
+                scrolling="no"
+                id="ghl-get-started-form"
               />
             </div>
           ) : useJotform ? (

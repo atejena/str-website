@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -84,6 +84,20 @@ export default function ContactPageClient({ settings }: ContactPageClientProps) 
   const ghlFormUrl = integrations.ghl_contact_form_url || integrations.ghl_general_form_url || null;
   const useGHL = !!ghlFormUrl;
 
+  // Load GHL form embed script for auto-resize
+  useEffect(() => {
+    if (!useGHL) return;
+    const existingScript = document.querySelector('script[src*="form_embed.js"]');
+    if (existingScript) return;
+    const script = document.createElement('script');
+    script.src = 'https://link.msgsndr.com/js/form_embed.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      script.remove();
+    };
+  }, [useGHL]);
+
   const {
     register,
     handleSubmit,
@@ -152,9 +166,10 @@ export default function ContactPageClient({ settings }: ContactPageClientProps) 
                       </h2>
                       <iframe
                         src={ghlFormUrl!}
-                        style={{ width: '100%', minHeight: '600px', border: 'none' }}
+                        style={{ width: '100%', border: 'none', overflow: 'hidden' }}
                         title="Contact Form"
-                        allowFullScreen
+                        scrolling="no"
+                        id="ghl-contact-form"
                       />
                     </div>
                   ) : isSubmitted ? (
