@@ -1,0 +1,116 @@
+/* STR Fitness — GoHighLevel Form Custom CSS */
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@400;600;700&display=swap');
+
+/* Page and form background */
+html, body, .fb-page, .fb-form-container {
+  background-color: #2a2a35;
+  color: #e5e5e5;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+form {
+  background-color: #2a2a35;
+  padding: 24px;
+  border-radius: 4px;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #e5e5e5;
+}
+
+/* Style labels */
+label {
+  color: #ffffff;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Style input fields */
+input, textarea, select {
+  width: 100%;
+  background-color: #15151d;
+  border: 1px solid rgba(229, 229, 229, 0.2);
+  border-radius: 2px;
+  color: #ffffff;
+  padding: 12px 16px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input::placeholder, textarea::placeholder {
+  color: rgba(229, 229, 229, 0.5);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #fcb040;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(252, 176, 64, 0.2);
+}
+
+/* Style checkboxes and radios */
+input[type="checkbox"], input[type="radio"] {
+  accent-color: #fcb040;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Style submit button */
+button[type="submit"] {
+  background-color: #fcb040;
+  color: #15151d;
+  font-family: 'Oswald', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #ffc060;
+}
+
+/* Style headings */
+h1, h2, h3, h4 {
+  font-family: 'Oswald', system-ui, sans-serif;
+  color: #ffffff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Style helper text and descriptions */
+p, small {
+  color: rgba(229, 229, 229, 0.7);
+  font-size: 12px;
+}
+
+/* Style links */
+a {
+  color: #fcb040;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: #ffc060;
+}
+
+/* Style error messages */
+.error, .invalid-feedback {
+  color: #ef4444;
+  font-size: 12px;
+}
+
+/* Dividers */
+hr {
+  border-color: #444444;
+  opacity: 0.5;
+}
