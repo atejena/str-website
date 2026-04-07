@@ -99,10 +99,13 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   manifest: '/site.webmanifest',
+  alternates: {
+    canonical: 'https://trainwithstr.com',
+  },
 };
 
-// JSON-LD base — email/phone populated dynamically in the component
-function buildJsonLd(email: string, phone: string) {
+// JSON-LD base — email/phone/sameAs populated dynamically in the component
+function buildJsonLd(email: string, phone: string, sameAs: string[]) {
   return {
     '@context': 'https://schema.org',
     '@type': 'HealthClub',
@@ -145,7 +148,7 @@ function buildJsonLd(email: string, phone: string) {
     priceRange: '$$',
     currenciesAccepted: 'USD',
     paymentAccepted: 'Cash, Credit Card',
-    sameAs: [],
+    sameAs,
   };
 }
 
@@ -215,7 +218,15 @@ export default async function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(gymInfo.email, gymInfo.phone)) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(
+              buildJsonLd(
+                gymInfo.email,
+                gymInfo.phone,
+                [socialLinks.instagram, socialLinks.facebook, socialLinks.youtube, socialLinks.tiktok].filter(Boolean),
+              ),
+            ),
+          }}
         />
       </head>
       <body

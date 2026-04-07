@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { GymClass, ClassScheduleItem, Trainer } from '@/types';
 import ClassDetailClient from './ClassDetailClient';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://trainwithstr.com';
 
 // Helper to map snake_case DB rows to camelCase GymClass type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -78,6 +81,43 @@ function mapDbTrainer(row: any): Trainer {
 
 interface ClassDetailPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: ClassDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createServerSupabaseClient();
+
+  const { data: row } = await supabase
+    .from('gym_classes')
+    .select('name, short_description, meta_title, meta_description, featured_image')
+    .eq('slug', slug)
+    .single();
+
+  if (!row) return {};
+
+  const title = (row.meta_title as string) || (row.name as string);
+  const description = (row.meta_description as string) || (row.short_description as string);
+  const image = (row.featured_image as string) || '/images/og-image.jpg';
+  const canonicalUrl = `${SITE_URL}/classes/${slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      type: 'website',
+      title,
+      description,
+      url: canonicalUrl,
+      images: [{ url: image, width: 1200, height: 630, alt: row.name as string }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
+  };
 }
 
 export default async function ClassDetailPage({ params }: ClassDetailPageProps) {

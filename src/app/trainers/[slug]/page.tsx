@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { Trainer, GymClass } from '@/types';
 import TrainerDetailClient from './TrainerDetailClient';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://trainwithstr.com';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapDbTrainer(row: any): Trainer {
@@ -59,6 +62,46 @@ function mapDbClass(row: any): GymClass {
 
 interface TrainerDetailPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: TrainerDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createServerSupabaseClient();
+
+  const { data: row } = await supabase
+    .from('trainers')
+    .select('name, title, short_bio, photo')
+    .eq('slug', slug)
+    .single();
+
+  if (!row) return {};
+
+  const name = row.name as string;
+  const trainerTitle = row.title as string;
+  const description =
+    (row.short_bio as string) ||
+    `${name} is a ${trainerTitle} at STR Fitness in Cranford, NJ.`;
+  const image = (row.photo as string) || '/images/og-image.jpg';
+  const canonicalUrl = `${SITE_URL}/trainers/${slug}`;
+
+  return {
+    title: name,
+    description,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      type: 'profile',
+      title: `${name} | STR Fitness`,
+      description,
+      url: canonicalUrl,
+      images: [{ url: image, width: 800, height: 800, alt: name }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${name} | STR Fitness`,
+      description,
+      images: [image],
+    },
+  };
 }
 
 export default async function TrainerDetailPage({ params }: TrainerDetailPageProps) {

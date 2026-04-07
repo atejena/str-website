@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import BlogPostClient from './BlogPostClient';
 import type { BlogPost } from '@/types/database';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://trainwithstr.com';
 
 // Map snake_case DB columns to camelCase BlogPost fields
 function mapBlogPost(row: Record<string, unknown>): BlogPost {
@@ -30,6 +33,48 @@ function mapBlogPost(row: Record<string, unknown>): BlogPost {
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createServerSupabaseClient();
+
+  const { data: row } = await supabase
+    .from('blog_posts')
+    .select('title, excerpt, meta_title, meta_description, meta_keywords, featured_image, author_name, publish_date')
+    .eq('slug', slug)
+    .eq('published', true)
+    .single();
+
+  if (!row) return {};
+
+  const title = (row.meta_title as string) || (row.title as string);
+  const description = (row.meta_description as string) || (row.excerpt as string);
+  const image = (row.featured_image as string) || '/images/og-image.jpg';
+  const keywords = (row.meta_keywords as string[]) || [];
+  const canonicalUrl = `${SITE_URL}/blog/${slug}`;
+
+  return {
+    title,
+    description,
+    ...(keywords.length > 0 && { keywords }),
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      type: 'article',
+      title,
+      description,
+      url: canonicalUrl,
+      images: [{ url: image, width: 1200, height: 630, alt: row.title as string }],
+      publishedTime: row.publish_date as string,
+      authors: [(row.author_name as string) || 'STR Fitness'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
+  };
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
