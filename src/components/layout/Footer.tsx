@@ -2,28 +2,23 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, Mail, Instagram, Facebook } from 'lucide-react';
+import { MapPin, Mail, Phone, Instagram, Facebook } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Container } from './Container';
 import { usePageVisibility } from '@/lib/contexts/page-visibility';
+import { useFooterData } from '@/lib/contexts/footer-context';
 
-interface FooterProps {
-  socialLinks?: {
-    instagram?: string;
-    facebook?: string;
-  };
-  contactEmail?: string;
-}
-
-export function Footer({ socialLinks = {}, contactEmail = 'info@trainwithstr.com' }: FooterProps) {
+export function Footer() {
+  const { email: contactEmail, phone, socialLinks } = useFooterData();
   const currentYear = new Date().getFullYear();
   const pageVisibility = usePageVisibility();
 
   const allNavigationLinks = [
-    { href: '/about', label: 'About', key: 'about' },
     { href: '/classes', label: 'Classes', key: 'classes' },
+    { href: '/trainers', label: 'Trainers', key: 'trainers' },
     { href: '/pricing', label: 'Pricing', key: 'pricing' },
-    { href: '/blog', label: 'Blog', key: 'blog' },
+    { href: '/programming', label: 'Programming', key: 'programming' },
+    { href: '/about', label: 'About', key: 'about' },
     { href: '/contact', label: 'Contact', key: 'contact' },
   ];
 
@@ -95,6 +90,17 @@ export function Footer({ socialLinks = {}, contactEmail = 'info@trainwithstr.com
                   </span>
                 </a>
               </li>
+              {phone && (
+                <li>
+                  <a
+                    href={`tel:${phone}`}
+                    className="flex items-center gap-3 text-concrete hover:text-str-gold transition-colors text-sm"
+                  >
+                    <Phone className="w-4 h-4 flex-shrink-0" />
+                    <span>{phone}</span>
+                  </a>
+                </li>
+              )}
               <li>
                 <a
                   href={`mailto:${contactEmail}`}

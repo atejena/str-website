@@ -15,6 +15,7 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   { url: `${SITE_URL}/testimonials`, changeFrequency: 'monthly', priority: 0.6 },
   { url: `${SITE_URL}/faq`, changeFrequency: 'monthly', priority: 0.6 },
   { url: `${SITE_URL}/careers`, changeFrequency: 'monthly', priority: 0.5 },
+  { url: `${SITE_URL}/terms`, changeFrequency: 'yearly', priority: 0.3 },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -35,21 +36,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq('active', true),
   ]);
 
-  const blogRoutes: MetadataRoute.Sitemap = (posts ?? []).map((post) => ({
+  const blogRoutes: MetadataRoute.Sitemap = (posts ?? []).map((post: { slug: string; updated_at: string | null }) => ({
     url: `${SITE_URL}/blog/${post.slug}`,
     lastModified: post.updated_at ? new Date(post.updated_at) : undefined,
     changeFrequency: 'weekly',
     priority: 0.7,
   }));
 
-  const classRoutes: MetadataRoute.Sitemap = (classes ?? []).map((gymClass) => ({
+  const classRoutes: MetadataRoute.Sitemap = (classes ?? []).map((gymClass: { slug: string; updated_at: string | null }) => ({
     url: `${SITE_URL}/classes/${gymClass.slug}`,
     lastModified: gymClass.updated_at ? new Date(gymClass.updated_at) : undefined,
     changeFrequency: 'monthly',
     priority: 0.7,
   }));
 
-  const trainerRoutes: MetadataRoute.Sitemap = (trainers ?? []).map((trainer) => ({
+  const trainerRoutes: MetadataRoute.Sitemap = (trainers ?? []).map((trainer: { slug: string; updated_at: string | null }) => ({
     url: `${SITE_URL}/trainers/${trainer.slug}`,
     lastModified: trainer.updated_at ? new Date(trainer.updated_at) : undefined,
     changeFrequency: 'monthly',

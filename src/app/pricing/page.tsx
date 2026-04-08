@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import PricingPageClient from './PricingPageClient';
-import type { MembershipPlan, FAQ } from '@/types';
+import type { MembershipPlan } from '@/types';
 
 export default async function PricingPage() {
   const supabase = await createServerSupabaseClient();
@@ -11,14 +11,6 @@ export default async function PricingPage() {
     .eq('active', true)
     .order('sort_order');
 
-  const { data: faqsData } = await supabase
-    .from('faqs')
-    .select('*')
-    .eq('category', 'Membership')
-    .eq('active', true)
-    .order('sort_order');
-
-  // Map snake_case DB columns to camelCase types
   const plans: MembershipPlan[] = (plansData || []).map((p: Record<string, unknown>) => ({
     id: p.id as string,
     name: p.name as string,
@@ -43,16 +35,5 @@ export default async function PricingPage() {
     updatedAt: (p.updated_at as string) || '',
   }));
 
-  const faqs: FAQ[] = (faqsData || []).map((f: Record<string, unknown>) => ({
-    id: f.id as string,
-    question: (f.question as string) || '',
-    answer: (f.answer as string) || '',
-    category: (f.category as FAQ['category']) || 'Membership',
-    sortOrder: (f.sort_order as number) || 0,
-    active: (f.active as boolean) || true,
-    createdAt: (f.created_at as string) || '',
-    updatedAt: (f.updated_at as string) || '',
-  }));
-
-  return <PricingPageClient plans={plans} faqs={faqs} />;
+  return <PricingPageClient plans={plans} />;
 }

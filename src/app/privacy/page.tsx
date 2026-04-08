@@ -97,7 +97,7 @@ export default async function PrivacyPage() {
           </div>
         </Section>
       </main>
-      {maintenance ? <MinimalFooter contactEmail={contactEmail} /> : <Footer contactEmail={contactEmail} />}
+      {maintenance ? <MinimalFooter contactEmail={contactEmail} /> : <Footer />}
     </>
   );
 }

@@ -23,14 +23,6 @@ export default async function Home() {
     .eq('approved', true)
     .order('created_at', { ascending: false });
 
-  // Fetch social links for footer
-  const { data: settings } = await supabase
-    .from('site_settings')
-    .select('value')
-    .eq('key', 'social_links')
-    .single();
-
-  const socialLinks = settings?.value || {};
 
   // Fetch jotform settings
   const { data: jotformSettings } = await supabase
@@ -52,7 +44,7 @@ export default async function Home() {
     .eq('key', 'integrations')
     .single();
 
-  const ghlGetStartedFormUrl = (integrationsSettings?.value as any)?.ghl_get_started_form_url || null;
+  const ghlGetStartedFormUrl = (integrationsSettings?.value as Record<string, string> | null)?.ghl_get_started_form_url || null;
 
   // Fetch Google Place ID for review links
   const { data: googlePlaceIdSetting } = await supabase
@@ -82,7 +74,7 @@ export default async function Home() {
         <HeroHome />
 
         {/* 2. Find Us - Contact Information */}
-        <FindUs contactEmail={gymInfo.email} />
+        <FindUs contactEmail={gymInfo.email} phone={gymInfo.phone || undefined} />
 
         {/* 3. Get Started - Signup Form */}
         <GetStartedForm jotform={jotform} ghlFormUrl={ghlGetStartedFormUrl} />
@@ -106,7 +98,7 @@ export default async function Home() {
       </main>
 
       {/* 9. Footer */}
-      <Footer socialLinks={socialLinks} contactEmail={gymInfo.email} />
+      <Footer />
     </>
   );
 }

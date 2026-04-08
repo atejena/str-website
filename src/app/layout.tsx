@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Oswald, Inter } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/Toast';
 import GoHighLevelWidget from '@/components/GoHighLevelWidget';
@@ -7,6 +8,7 @@ import MaintenanceGuard from '@/components/MaintenanceGuard';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getGymInfo } from '@/lib/site-settings';
 import { PageVisibilityProvider } from '@/lib/contexts/page-visibility';
+import { FooterDataProvider } from '@/lib/contexts/footer-context';
 
 const oswald = Oswald({
   variable: '--font-oswald',
@@ -148,6 +150,17 @@ function buildJsonLd(email: string, phone: string, sameAs: string[]) {
     priceRange: '$$',
     currenciesAccepted: 'USD',
     paymentAccepted: 'Cash, Credit Card',
+    areaServed: [
+      'Cranford, NJ',
+      'Westfield, NJ',
+      'Garwood, NJ',
+      'Clark, NJ',
+      'Kenilworth, NJ',
+      'Springfield, NJ',
+      'Roselle Park, NJ',
+      'Union, NJ',
+      'Union County, NJ',
+    ],
     sameAs,
   };
 }
@@ -165,8 +178,9 @@ export default async function RootLayout({
     .eq('key', 'integrations')
     .single();
 
-  const ghlWidgetId =
-    (integrationSettings?.value as Record<string, string> | null)?.gohighlevel_widget_id || '';
+  const integrations = (integrationSettings?.value as Record<string, string> | null) ?? {};
+  const ghlWidgetId = integrations.gohighlevel_widget_id || '';
+  const gaId = integrations.google_analytics_id || '';
 
   // Fetch maintenance mode settings
   const { data: maintenanceRow } = await supabase
@@ -233,6 +247,7 @@ export default async function RootLayout({
         className={`${oswald.variable} ${inter.variable} min-h-screen bg-background text-foreground antialiased`}
       >
         <ToastProvider>
+          <FooterDataProvider data={{ email: gymInfo.email, phone: gymInfo.phone, socialLinks }}>
           <PageVisibilityProvider visibility={pageVisibility}>
             <a href="#main-content" className="skip-link">
               Skip to main content
@@ -246,8 +261,20 @@ export default async function RootLayout({
               {children}
             </MaintenanceGuard>
           </PageVisibilityProvider>
+          </FooterDataProvider>
         </ToastProvider>
         {ghlWidgetId && <GoHighLevelWidget widgetId={ghlWidgetId} />}
+        {gaId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );

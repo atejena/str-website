@@ -97,7 +97,7 @@ export default async function TermsPage() {
           </div>
         </Section>
       </main>
-      {maintenance ? <MinimalFooter contactEmail={contactEmail} /> : <Footer contactEmail={contactEmail} />}
+      {maintenance ? <MinimalFooter contactEmail={contactEmail} /> : <Footer />}
     </>
   );
 }

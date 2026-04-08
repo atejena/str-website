@@ -111,5 +111,36 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     .filter((p: BlogPost) => p.tags.some((tag: string) => post.tags.includes(tag)))
     .slice(0, 3);
 
-  return <BlogPostClient post={post} relatedPosts={relatedPosts} />;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt,
+    image: post.featuredImage || `${SITE_URL}/images/og-image.jpg`,
+    datePublished: post.publishDate,
+    dateModified: post.updatedAt || post.publishDate,
+    author: {
+      '@type': 'Person',
+      name: post.authorName || 'STR Fitness',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'STR Fitness',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://trainwithstr.com/images/str-logo.webp',
+      },
+    },
+    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <BlogPostClient post={post} relatedPosts={relatedPosts} />
+    </>
+  );
 }

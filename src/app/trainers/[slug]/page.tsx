@@ -155,11 +155,32 @@ export default async function TrainerDetailPage({ params }: TrainerDetailPagePro
 
   const otherTrainers: Trainer[] = (otherTrainerRows ?? []).map(mapDbTrainer);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: trainer.name,
+    jobTitle: trainer.title,
+    description: trainer.shortBio || trainer.bio,
+    image: trainer.photo || `${SITE_URL}/images/og-image.jpg`,
+    url: `${SITE_URL}/trainers/${trainer.slug}`,
+    worksFor: {
+      '@type': 'HealthClub',
+      name: 'STR - Strength Through Resilience',
+      url: 'https://trainwithstr.com',
+    },
+  };
+
   return (
-    <TrainerDetailClient
-      trainer={trainer}
-      trainerClasses={trainerClasses}
-      otherTrainers={otherTrainers}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <TrainerDetailClient
+        trainer={trainer}
+        trainerClasses={trainerClasses}
+        otherTrainers={otherTrainers}
+      />
+    </>
   );
 }

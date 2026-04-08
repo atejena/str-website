@@ -187,12 +187,32 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
 
   const relatedClasses: GymClass[] = (relatedRows ?? []).map(mapDbClass);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: gymClass.name,
+    description: gymClass.description || gymClass.shortDescription,
+    image: gymClass.featuredImage || `${SITE_URL}/images/og-image.jpg`,
+    url: `${SITE_URL}/classes/${gymClass.slug}`,
+    provider: {
+      '@type': 'HealthClub',
+      name: 'STR - Strength Through Resilience',
+      url: 'https://trainwithstr.com',
+    },
+  };
+
   return (
-    <ClassDetailClient
-      gymClass={gymClass}
-      classSchedule={classSchedule}
-      classInstructor={classInstructor}
-      relatedClasses={relatedClasses}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ClassDetailClient
+        gymClass={gymClass}
+        classSchedule={classSchedule}
+        classInstructor={classInstructor}
+        relatedClasses={relatedClasses}
+      />
+    </>
   );
 }

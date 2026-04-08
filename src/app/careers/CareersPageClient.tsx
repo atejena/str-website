@@ -25,7 +25,6 @@ interface CareerPosting {
 interface CareersPageClientProps {
   contactEmail?: string;
   postings: CareerPosting[];
-  socialLinks: Record<string, string>;
 }
 
 const containerVariants = {
@@ -41,7 +40,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-export default function CareersPageClient({ postings, socialLinks, contactEmail = 'info@trainwithstr.com' }: CareersPageClientProps) {
+export default function CareersPageClient({ postings, contactEmail = 'info@trainwithstr.com' }: CareersPageClientProps) {
   return (
     <>
       <Header />
@@ -211,7 +210,7 @@ export default function CareersPageClient({ postings, socialLinks, contactEmail 
         </section>
       </main>
 
-      <Footer socialLinks={socialLinks} />
+      <Footer />
     </>
   );
 }
